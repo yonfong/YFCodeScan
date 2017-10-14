@@ -1,0 +1,6 @@
+framework module YFCodeScan {
+  umbrella header "YFCodeScan-umbrella.h"
+
+  export *
+  module * { export * }
+}
