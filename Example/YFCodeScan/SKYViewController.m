@@ -7,8 +7,11 @@
 //
 
 #import "SKYViewController.h"
+#import <YFCodeScan/YFScanner.h>
 
 @interface SKYViewController ()
+
+@property (nonatomic, strong)YFScanner *scanner;
 
 @end
 
@@ -17,13 +20,22 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-	// Do any additional setup after loading the view, typically from a nib.
+	
+    self.scanner = [[YFScanner alloc] initWithScanSuccess:^(NSString * _Nonnull scannedResult) {
+        NSLog(@"scanned code >> %@",scannedResult);
+    }];
+    
+    [self configureInterface];
 }
 
-- (void)didReceiveMemoryWarning
+
+- (void)configureInterface
 {
-    [super didReceiveMemoryWarning];
-    // Dispose of any resources that can be recreated.
+    AVCaptureVideoPreviewLayer *previewLayer = [self.scanner previewLayer];
+    previewLayer.frame = self.view.bounds;
+    [self.view.layer insertSublayer:previewLayer atIndex:0];
+    
+    [self.scanner startScanning];
 }
 
 @end

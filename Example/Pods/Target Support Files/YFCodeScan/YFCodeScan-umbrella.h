@@ -10,6 +10,7 @@
 #endif
 #endif
 
+#import "YFScanner.h"
 
 FOUNDATION_EXPORT double YFCodeScanVersionNumber;
 FOUNDATION_EXPORT const unsigned char YFCodeScanVersionString[];
