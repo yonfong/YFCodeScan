@@ -42,6 +42,7 @@
     previewLayer.videoGravity = AVLayerVideoGravityResizeAspectFill;
     [preview.layer insertSublayer:previewLayer atIndex:0];
     [self.scanner startScanning];
+    [preview startScanningAnimation];
 }
 
 @end

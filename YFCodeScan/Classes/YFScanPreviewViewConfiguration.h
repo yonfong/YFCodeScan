@@ -7,6 +7,12 @@
 
 #import <Foundation/Foundation.h>
 
+typedef NS_ENUM(NSInteger,YFScanningAnimationStyle)
+{
+    YFScanningAnimationStyleNone,
+    YFScanningAnimationStyleLine,
+};
+
 typedef NS_ENUM(NSInteger, YFScanCropAngleStyle) {
     YFScanCropAngleStyleOuter,
     YFScanCropAngleStyleInner,
@@ -26,6 +32,8 @@ typedef NS_ENUM(NSInteger, YFScanCropAngleStyle) {
 
 @property (nonatomic, assign) YFScanCropAngleStyle scanCropAngleStyle;
 
+@property (nonatomic, assign) YFScanningAnimationStyle scanningAnimationStyle;
+
 @property (nonatomic, strong) UIColor * _Nullable scanCropAngleLineColor;
 
 @property (nonatomic, assign) CGFloat scanCropAngleLineWidth;
@@ -33,5 +41,7 @@ typedef NS_ENUM(NSInteger, YFScanCropAngleStyle) {
 @property (nonatomic, assign) CGFloat scanCropAngleLineHeight;
 
 @property (nonatomic, strong) UIColor * _Nullable scanCropOuterFillColor;
+
+
 
 @end

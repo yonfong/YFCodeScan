@@ -11,6 +11,7 @@
 #endif
 
 #import "YFScanner.h"
+#import "YFScanningAnimationConfiguration.h"
 #import "YFScanPreviewView.h"
 #import "YFScanPreviewViewConfiguration.h"
 

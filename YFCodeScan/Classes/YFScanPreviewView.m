@@ -6,6 +6,7 @@
 //
 
 #import "YFScanPreviewView.h"
+#import "YFScanningAnimationConfiguration.h"
 
 @interface YFScanPreviewView()
 
@@ -29,7 +30,13 @@
 
 - (void)startScanningAnimation
 {
-    
+    if (self.configuration.scanningAnimationStyle != YFScanningAnimationStyleNone) {
+        YFScanningAnimationConfiguration *animationConfig = [[YFScanningAnimationConfiguration alloc] init];
+        
+        UIView *line = [[UIView alloc] initWithFrame:CGRectMake(self.scanCrop.origin.x, self.scanCrop.origin.y, CGRectGetWidth(self.scanCrop), 2)];
+        line.backgroundColor = [UIColor redColor];
+        [animationConfig startAnimationInView:self animationRect:self.scanCrop animationView:line];
+    }
 }
 
 - (void)stopScanningAnimation
