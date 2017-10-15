@@ -11,6 +11,8 @@
 #endif
 
 #import "YFScanner.h"
+#import "YFScanPreviewView.h"
+#import "YFScanPreviewViewConfiguration.h"
 
 FOUNDATION_EXPORT double YFCodeScanVersionNumber;
 FOUNDATION_EXPORT const unsigned char YFCodeScanVersionString[];
