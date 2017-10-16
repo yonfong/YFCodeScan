@@ -8,8 +8,19 @@
 #import <Foundation/Foundation.h>
 #import "YFScanningAnimationProtocol.h"
 
+typedef NS_ENUM(NSInteger, YFLineAnimationType) {
+    YFLineAnimationTypeUpToDown,
+    YFLineAnimationTypeUpToDownThenReverse
+};
+
 @interface YFScanningLineAnimation : NSObject <YFScanningAnimationProtocol>
 
 @property (nonatomic, strong) __kindof UIView *lineView;
+
+@property (nonatomic, assign) YFLineAnimationType lineAnimationType;
+
+@property (nonatomic, strong) CAMediaTimingFunction *timingFunction;
+
+@property (nonatomic, assign) CFTimeInterval duration;
 
 @end

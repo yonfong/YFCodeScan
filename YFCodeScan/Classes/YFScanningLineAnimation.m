@@ -15,6 +15,15 @@ static NSString * const kScanPostionKeyframeValueAnimation = @"kScanPostionKeyfr
 
 @implementation YFScanningLineAnimation
 
+- (instancetype)init {
+    if (self = [super init]) {
+        _lineAnimationType = YFLineAnimationTypeUpToDown;
+        _timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut];
+        _duration = 3.0;
+    }
+    return self;
+}
+
 - (void)startAnimationInView:(UIView*)preview limitRect:(CGRect)limitRect
 {
     if (!self.lineView) {
@@ -35,26 +44,36 @@ static NSString * const kScanPostionKeyframeValueAnimation = @"kScanPostionKeyfr
     self.lineView.frame = initialRect;
     self.lineView.hidden = NO;
     
-    CAKeyframeAnimation *animation = [self upDownAnimationForLineRect:initialRect limitRect:limitRect];
+    CAKeyframeAnimation *animation = [self animationForLineRect:initialRect limitRect:limitRect];
     [self.lineView.layer addAnimation:animation forKey:kScanPostionKeyframeValueAnimation];
 }
 
-- (CAKeyframeAnimation *)upDownAnimationForLineRect:(CGRect)lineRect limitRect:(CGRect)limitRect {
+- (CAKeyframeAnimation *)animationForLineRect:(CGRect)lineRect limitRect:(CGRect)limitRect {
     CAKeyframeAnimation *animation = [CAKeyframeAnimation animationWithKeyPath:@"position"];
-    animation.duration = 3.0;
+    animation.duration = _duration > 0 ? : 3.0;
     animation.repeatCount = HUGE_VALF;
     animation.removedOnCompletion = NO;
     animation.fillMode = kCAFillModeForwards;
-    animation.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut];
-    NSValue *value1 = [NSValue valueWithCGPoint:CGPointMake(lineRect.origin.x + CGRectGetWidth(lineRect) / 2, lineRect.origin.y)];
-    NSValue *value2=[NSValue valueWithCGPoint:CGPointMake(lineRect.origin.x + CGRectGetWidth(lineRect) / 2, lineRect.origin.y + CGRectGetHeight(limitRect) / 2)];
-    NSValue *value3=[NSValue valueWithCGPoint:CGPointMake(lineRect.origin.x + CGRectGetWidth(lineRect) / 2, lineRect.origin.y + CGRectGetHeight(limitRect))];
-    NSValue *value4=[NSValue valueWithCGPoint:CGPointMake(lineRect.origin.x + CGRectGetWidth(lineRect) / 2, lineRect.origin.y + CGRectGetHeight(limitRect) / 2)];
-    NSValue *value5=[NSValue valueWithCGPoint:CGPointMake(lineRect.origin.x + CGRectGetWidth(lineRect) / 2, lineRect.origin.y)];
-    animation.values = @[value1, value2, value3, value4, value5];
+    animation.timingFunction = _timingFunction ? : [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionLinear];
+    
+    if (_lineAnimationType == YFLineAnimationTypeUpToDownThenReverse) {
+        NSValue *value1 = [NSValue valueWithCGPoint:CGPointMake(lineRect.origin.x + CGRectGetWidth(lineRect) / 2, lineRect.origin.y)];
+        NSValue *value2=[NSValue valueWithCGPoint:CGPointMake(lineRect.origin.x + CGRectGetWidth(lineRect) / 2, lineRect.origin.y + CGRectGetHeight(limitRect) / 2)];
+        NSValue *value3=[NSValue valueWithCGPoint:CGPointMake(lineRect.origin.x + CGRectGetWidth(lineRect) / 2, lineRect.origin.y + CGRectGetHeight(limitRect) - 1)];
+        NSValue *value4=[NSValue valueWithCGPoint:CGPointMake(lineRect.origin.x + CGRectGetWidth(lineRect) / 2, lineRect.origin.y + CGRectGetHeight(limitRect) / 2)];
+        NSValue *value5=[NSValue valueWithCGPoint:CGPointMake(lineRect.origin.x + CGRectGetWidth(lineRect) / 2, lineRect.origin.y)];
+        animation.values = @[value1, value2, value3, value4, value5];
+    } else {
+        NSValue *value1 = [NSValue valueWithCGPoint:CGPointMake(lineRect.origin.x + CGRectGetWidth(lineRect) / 2, lineRect.origin.y)];
+        NSValue *value2=[NSValue valueWithCGPoint:CGPointMake(lineRect.origin.x + CGRectGetWidth(lineRect) / 2, lineRect.origin.y + CGRectGetHeight(limitRect) * 1 / 4)];
+        NSValue *value3=[NSValue valueWithCGPoint:CGPointMake(lineRect.origin.x + CGRectGetWidth(lineRect) / 2, lineRect.origin.y + CGRectGetHeight(limitRect) * 2 / 4)];
+        NSValue *value4=[NSValue valueWithCGPoint:CGPointMake(lineRect.origin.x + CGRectGetWidth(lineRect) / 2, lineRect.origin.y + CGRectGetHeight(limitRect) * 3 / 4)];
+        NSValue *value5=[NSValue valueWithCGPoint:CGPointMake(lineRect.origin.x + CGRectGetWidth(lineRect) / 2, lineRect.origin.y + CGRectGetHeight(limitRect) * 4 / 4 - 1) ];
+        animation.values = @[value1, value2, value3, value4, value5];
+    }
+    
     return animation;
 }
-
 
 - (void)stopAnimation
 {
