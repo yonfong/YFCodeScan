@@ -199,6 +199,55 @@
     return scanCrop;
 }
 
+- (CGRect)getRectOfInterest
+{
+    CGRect previewRect = self.bounds;
+    CGFloat marginLeft = _configuration.scanCropXMargin;
+    CGRect innerRect = CGRectInset(previewRect, marginLeft, marginLeft);
+    CGFloat aspectRatio = _configuration.scanCropAspectRatio;
+    
+    if (aspectRatio != 0) {
+        CGFloat width = CGRectGetWidth(innerRect);
+        CGFloat preHeight = CGRectGetHeight(innerRect);
+        CGFloat height = width / aspectRatio;
+        
+        innerRect.origin.y += (preHeight - height) / 2;
+        innerRect.size.height = height;
+    }
+    
+    CGFloat centerYOffset = _configuration.scanCropCenterYOffset;
+    CGRect scanCrop = CGRectOffset(innerRect, 0, centerYOffset);
+    
+    //计算兴趣区域
+    CGRect rectOfInterest;
+    
+    //ref:https://blog.cnbluebox.com/blog/2014/08/26/ioser-wei-ma-sao-miao/
+    CGSize size = previewRect.size;
+    CGFloat p1 = size.height/size.width;
+    CGFloat p2 = 1920./1080.;  //使用了1080p的图像输出
+    if (p1 < p2) {
+        CGFloat fixHeight = size.width * 1920. / 1080.;
+        CGFloat fixPadding = (fixHeight - size.height)/2;
+        rectOfInterest = CGRectMake((scanCrop.origin.y + fixPadding)/fixHeight,
+                                    scanCrop.origin.x/size.width,
+                                    scanCrop.size.height/fixHeight,
+                                    scanCrop.size.width/size.width);
+        
+        
+    } else {
+        CGFloat fixWidth = size.height * 1080. / 1920.;
+        CGFloat fixPadding = (fixWidth - size.width)/2;
+        rectOfInterest = CGRectMake(scanCrop.origin.y/size.height,
+                                    (scanCrop.origin.x + fixPadding)/fixWidth,
+                                    scanCrop.size.height/size.height,
+                                    scanCrop.size.width/fixWidth);
+        
+        
+    }
+    
+    return rectOfInterest;
+}
+
 //根据矩形区域，获取识别区域
 + (CGRect)getScanRectInRect:(CGRect)previewRect configuration:(YFScanPreviewViewConfiguration*)configuration;
 {

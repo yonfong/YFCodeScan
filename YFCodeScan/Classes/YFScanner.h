@@ -15,7 +15,7 @@
 
 - (instancetype _Nullable )initWithScanSuccess:(void(^_Nullable)(NSString * _Nonnull scannedResult))success;
 
-- (instancetype _Nullable )initWithScanCrop:(CGRect)scanCrop scanSuccess:(void (^_Nullable)(NSString *_Nonnull))success;
+- (instancetype _Nullable )initWithScanCrop:(CGRect)scanCrop scanSuccess:(void (^_Nullable)(NSString *_Nonnull scannedResult))success;
 
 - (void)startScanning;
 

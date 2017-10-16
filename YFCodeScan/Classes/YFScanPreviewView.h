@@ -20,4 +20,6 @@
 
 - (CGRect)getScanCropRect;
 
+- (CGRect)getRectOfInterest;
+
 @end

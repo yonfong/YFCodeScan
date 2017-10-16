@@ -10,6 +10,7 @@
 #endif
 #endif
 
+#import "YFScanController.h"
 #import "YFScanner.h"
 #import "YFScanningAnimationProtocol.h"
 #import "YFScanningLineAnimation.h"
