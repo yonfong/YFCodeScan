@@ -6,13 +6,13 @@
 //
 
 #import "YFScanPreviewView.h"
-#import "YFScanningAnimationConfiguration.h"
+#import "YFScanningLineAnimation.h"
 
 @interface YFScanPreviewView()
 
 @property (nonatomic, strong) YFScanPreviewViewConfiguration *configuration;
 
-@property (nonatomic,assign) CGRect scanCrop;
+@property (nonatomic, assign, readonly) CGRect scanCrop;
 
 @end
 
@@ -30,39 +30,22 @@
 
 - (void)startScanningAnimation
 {
-    if (self.configuration.scanningAnimationStyle != YFScanningAnimationStyleNone) {
-        YFScanningAnimationConfiguration *animationConfig = [[YFScanningAnimationConfiguration alloc] init];
-        
-        UIView *line = [[UIView alloc] initWithFrame:CGRectMake(self.scanCrop.origin.x, self.scanCrop.origin.y, CGRectGetWidth(self.scanCrop), 2)];
-        line.backgroundColor = [UIColor redColor];
-        [animationConfig startAnimationInView:self animationRect:self.scanCrop animationView:line];
+    if (self.configuration.scanningAnimationStyle != YFScanningAnimationStyleNone && self.configuration.scanningAnimationItem) {
+        CGRect limitRect = self.scanCrop;
+        [self.configuration.scanningAnimationItem startAnimationInView:self limitRect:limitRect];
     }
 }
 
 - (void)stopScanningAnimation
 {
-    
+    if (self.configuration.scanningAnimationStyle != YFScanningAnimationStyleNone && self.configuration.scanningAnimationItem) {
+        [self.configuration.scanningAnimationItem stopAnimation];
+    }
 }
 
 
 - (void)drawRect:(CGRect)rect
 {
-    int marginLeft = _configuration.scanCropXMargin;
-    
-    CGRect innerRect = CGRectInset(rect, marginLeft, marginLeft);
-    CGFloat minSize = MIN(innerRect.size.width, innerRect.size.height);
-    if (innerRect.size.width != minSize) {
-        innerRect.origin.x   += marginLeft;
-        innerRect.size.width = minSize;
-    }
-    else if (innerRect.size.height != minSize) {
-        innerRect.origin.y   += (rect.size.height - minSize) / 2 - rect.size.height / 6;
-        innerRect.size.height = minSize;
-    }
-    CGFloat centerYOffset = _configuration.scanCropCenterYOffset;
-    CGRect scanCrop = CGRectOffset(innerRect, 0, centerYOffset);
-    self.scanCrop = scanCrop;
-    
     [self addOuterLayer];
     [self addScanCropLayer];
     [self addScanCropAngleLayer];
@@ -182,5 +165,80 @@
     shapeLayer.path          = path.CGPath;
     [self.layer addSublayer:shapeLayer];
 }
+
+- (CGRect)getScanCropRect {
+    return self.scanCrop;
+}
+
+- (CGRect)scanCrop {
+    CGFloat marginLeft = self.configuration.scanCropXMargin;
+    
+    CGRect innerRect = CGRectInset(self.bounds, marginLeft, marginLeft);
+    CGFloat aspectRatio = self.configuration.scanCropAspectRatio;
+    
+    if (aspectRatio != 0) {
+        CGFloat width = CGRectGetWidth(innerRect);
+        CGFloat preHeight = CGRectGetHeight(innerRect);
+        CGFloat height = width / aspectRatio;
+        
+        innerRect.origin.y += (preHeight - height) / 2;
+        innerRect.size.height = height;
+    }
+    
+    CGFloat centerYOffset = self.configuration.scanCropCenterYOffset;
+    CGRect scanCrop = CGRectOffset(innerRect, 0, centerYOffset);
+    return scanCrop;
+}
+
+//根据矩形区域，获取识别区域
++ (CGRect)getScanRectInRect:(CGRect)previewRect configuration:(YFScanPreviewViewConfiguration*)configuration;
+{
+    CGFloat marginLeft = configuration.scanCropXMargin;
+    
+    CGRect innerRect = CGRectInset(previewRect, marginLeft, marginLeft);
+    CGFloat aspectRatio = configuration.scanCropAspectRatio;
+    
+    if (aspectRatio != 0) {
+        CGFloat width = CGRectGetWidth(innerRect);
+        CGFloat preHeight = CGRectGetHeight(innerRect);
+        CGFloat height = width / aspectRatio;
+        
+        innerRect.origin.y += (preHeight - height) / 2;
+        innerRect.size.height = height;
+    }
+    
+    CGFloat centerYOffset = configuration.scanCropCenterYOffset;
+    CGRect scanCrop = CGRectOffset(innerRect, 0, centerYOffset);
+    
+    //计算兴趣区域
+    CGRect rectOfInterest;
+
+    //ref:https://blog.cnbluebox.com/blog/2014/08/26/ioser-wei-ma-sao-miao/
+    CGSize size = previewRect.size;
+    CGFloat p1 = size.height/size.width;
+    CGFloat p2 = 1920./1080.;  //使用了1080p的图像输出
+    if (p1 < p2) {
+        CGFloat fixHeight = size.width * 1920. / 1080.;
+        CGFloat fixPadding = (fixHeight - size.height)/2;
+        rectOfInterest = CGRectMake((scanCrop.origin.y + fixPadding)/fixHeight,
+                                    scanCrop.origin.x/size.width,
+                                    scanCrop.size.height/fixHeight,
+                                    scanCrop.size.width/size.width);
+        
+        
+    } else {
+        CGFloat fixWidth = size.height * 1080. / 1920.;
+        CGFloat fixPadding = (fixWidth - size.width)/2;
+        rectOfInterest = CGRectMake(scanCrop.origin.y/size.height,
+                                    (scanCrop.origin.x + fixPadding)/fixWidth,
+                                    scanCrop.size.height/size.height,
+                                    scanCrop.size.width/fixWidth);
+        
+        
+    }
+    
+    return rectOfInterest;
+}
+
 
 @end

@@ -6,6 +6,7 @@
 //
 
 #import "YFScanPreviewViewConfiguration.h"
+#import "YFScanningLineAnimation.h"
 
 @implementation YFScanPreviewViewConfiguration
 
@@ -15,11 +16,13 @@
         _showScanCropBorder = YES;
         _scanCropXMargin = 60;
         _scanCropCenterYOffset = 0;
+        _scanCropAspectRatio = 1.0;
         
         _scanCropAngleLineWidth = 4;
         _scanCropAngleLineHeight = 20;
         _scanCropAngleStyle = YFScanCropAngleStyleInner;
-        _scanningAnimationStyle = YFScanningAnimationStyleNone;
+        _scanningAnimationStyle = YFScanningAnimationStyleLine;
+        _scanningAnimationItem = [[YFScanningLineAnimation alloc] init];
         
         _scanCropBorderColor = [UIColor whiteColor];
         _scanCropAngleLineColor = [UIColor colorWithRed:0. green:167./255. blue:231./255. alpha:1.0];

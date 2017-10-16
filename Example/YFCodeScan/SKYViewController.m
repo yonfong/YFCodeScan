@@ -29,7 +29,6 @@
     [self configureInterface];
 }
 
-
 - (void)configureInterface
 {
     YFScanPreviewViewConfiguration *configuration = [[YFScanPreviewViewConfiguration alloc] init];

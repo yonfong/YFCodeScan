@@ -16,4 +16,6 @@
 
 - (void)stopScanningAnimation;
 
+- (CGRect)getScanCropRect;
+
 @end
