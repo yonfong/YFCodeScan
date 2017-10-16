@@ -30,7 +30,7 @@
 
 - (void)startScanningAnimation
 {
-    if (self.configuration.scanningAnimationStyle != YFScanningAnimationStyleNone && self.configuration.scanningAnimationItem) {
+    if (self.configuration.scanningAnimationItem) {
         CGRect limitRect = self.scanCrop;
         [self.configuration.scanningAnimationItem startAnimationInView:self limitRect:limitRect];
     }
@@ -38,7 +38,7 @@
 
 - (void)stopScanningAnimation
 {
-    if (self.configuration.scanningAnimationStyle != YFScanningAnimationStyleNone && self.configuration.scanningAnimationItem) {
+    if (self.configuration.scanningAnimationItem) {
         [self.configuration.scanningAnimationItem stopAnimation];
     }
 }

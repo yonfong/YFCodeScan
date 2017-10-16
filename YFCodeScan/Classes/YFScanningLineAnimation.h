@@ -10,6 +10,6 @@
 
 @interface YFScanningLineAnimation : NSObject <YFScanningAnimationProtocol>
 
-@property (nonatomic, strong) UIView *lineView;
+@property (nonatomic, strong) __kindof UIView *lineView;
 
 @end

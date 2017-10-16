@@ -18,7 +18,8 @@ static NSString * const kScanPostionKeyframeValueAnimation = @"kScanPostionKeyfr
 - (void)startAnimationInView:(UIView*)preview limitRect:(CGRect)limitRect
 {
     if (!self.lineView) {
-        return;
+        self.lineView = [[UIView alloc] initWithFrame:CGRectMake(limitRect.origin.x, limitRect.origin.y + 1, CGRectGetWidth(limitRect) - 4, 1)];
+        self.lineView.backgroundColor = [UIColor greenColor];
     }
 
     self.lineView.hidden = YES;
@@ -26,22 +27,21 @@ static NSString * const kScanPostionKeyframeValueAnimation = @"kScanPostionKeyfr
         [self.lineView removeFromSuperview];
     }
     [preview addSubview:self.lineView];
-    CGFloat height = CGRectGetHeight(self.lineView.bounds);
-    CGFloat width = MIN(CGRectGetWidth(limitRect), CGRectGetWidth(self.lineView.bounds));
-    self.lineView.frame = CGRectMake(limitRect.origin.x, limitRect.origin.y, width, height);
+    
+    CGFloat lineHeight = CGRectGetHeight(self.lineView.bounds);
+    CGFloat lineWidth = MIN(CGRectGetWidth(limitRect), CGRectGetWidth(self.lineView.bounds));
+    CGRect frame = CGRectMake(limitRect.origin.x, limitRect.origin.y + 1, lineWidth, lineHeight);
+    CGRect initialRect = CGRectOffset(frame, (CGRectGetWidth(limitRect) - lineWidth)/2, 0);
+    self.lineView.frame = initialRect;
     self.lineView.hidden = NO;
     
-    CGRect centerTop = CGRectOffset(self.lineView.frame, (CGRectGetWidth(limitRect) - CGRectGetWidth(self.lineView.bounds))/2, 0);
-    self.lineView.frame = centerTop;
-    
-    CAKeyframeAnimation *animation = [self upDownAnimationForLineRect:centerTop limitRect:limitRect];
+    CAKeyframeAnimation *animation = [self upDownAnimationForLineRect:initialRect limitRect:limitRect];
     [self.lineView.layer addAnimation:animation forKey:kScanPostionKeyframeValueAnimation];
 }
 
-
 - (CAKeyframeAnimation *)upDownAnimationForLineRect:(CGRect)lineRect limitRect:(CGRect)limitRect {
     CAKeyframeAnimation *animation = [CAKeyframeAnimation animationWithKeyPath:@"position"];
-    animation.duration = 4.0;
+    animation.duration = 3.0;
     animation.repeatCount = HUGE_VALF;
     animation.removedOnCompletion = NO;
     animation.fillMode = kCAFillModeForwards;
@@ -61,14 +61,6 @@ static NSString * const kScanPostionKeyframeValueAnimation = @"kScanPostionKeyfr
     [self.lineView.layer removeAnimationForKey:kScanPostionKeyframeValueAnimation];
     self.lineView.hidden = YES;
     [self.lineView removeFromSuperview];
-}
-
-- (UIView *)lineView {
-    if (!_lineView) {
-        _lineView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 100, 1)];
-        _lineView.backgroundColor = [UIColor yellowColor];
-    }
-    return _lineView;
 }
 
 @end

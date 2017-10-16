@@ -21,7 +21,6 @@
         _scanCropAngleLineWidth = 4;
         _scanCropAngleLineHeight = 20;
         _scanCropAngleStyle = YFScanCropAngleStyleInner;
-        _scanningAnimationStyle = YFScanningAnimationStyleLine;
         _scanningAnimationItem = [[YFScanningLineAnimation alloc] init];
         
         _scanCropBorderColor = [UIColor whiteColor];
