@@ -86,9 +86,9 @@
     }
     CGRect rect = self.scanCrop;
     CAShapeLayer *shapeLayer = [[CAShapeLayer alloc] init];
+    shapeLayer.borderWidth = 2;
     shapeLayer.fillColor     = [UIColor clearColor].CGColor;
-    shapeLayer.borderWidth = 2.0;
-    shapeLayer.borderColor = _configuration.scanCropBorderColor.CGColor;
+    shapeLayer.strokeColor = _configuration.scanCropBorderColor.CGColor;
     shapeLayer.path          = [UIBezierPath bezierPathWithRect:rect].CGPath;;
     [self.layer addSublayer:shapeLayer];
 }
