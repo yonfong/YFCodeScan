@@ -18,16 +18,22 @@
         _scanCropCenterYOffset = 0;
         _scanCropAspectRatio = 1.0;
         
-        _scanCropAngleLineWidth = 4;
+        _scanCropBorderWidth = 0.5;
+        _scanCropAngleLineWidth = 2.0;
         _scanCropAngleLineHeight = 20;
         _scanCropAngleStyle = YFScanCropAngleStyleInner;
         _scanningAnimationItem = [[YFScanningLineAnimation alloc] init];
         
         _scanCropBorderColor = [UIColor whiteColor];
-        _scanCropAngleLineColor = [UIColor colorWithRed:0. green:167./255. blue:231./255. alpha:1.0];
-        _scanCropOuterFillColor = [UIColor colorWithRed:0. green:.0 blue:.0 alpha:.5];
+        _scanCropAngleLineColor = [UIColor greenColor];
+        _scanCropOuterFillColor = [UIColor colorWithRed:0 green:0 blue:0 alpha:0.6];
     }
     return self;
+}
+
++ (instancetype)defaultConfiguration
+{
+    return [[self alloc] init];
 }
 
 @end

@@ -12,6 +12,8 @@
 
 - (instancetype)initWithFrame:(CGRect)frame configuration:(YFScanPreviewViewConfiguration*)configuration;
 
++ (instancetype)defaultPreview;
+
 - (void)startScanningAnimation;
 
 - (void)stopScanningAnimation;

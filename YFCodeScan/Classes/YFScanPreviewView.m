@@ -18,7 +18,12 @@
 
 @implementation YFScanPreviewView
 
--(instancetype)initWithFrame:(CGRect)frame configuration:(YFScanPreviewViewConfiguration*)configuration
+- (instancetype)initWithFrame:(CGRect)frame {
+    YFScanPreviewViewConfiguration *defaultConfiguration = [[YFScanPreviewViewConfiguration alloc] init];
+    return [self initWithFrame:frame configuration:defaultConfiguration];
+}
+
+- (instancetype)initWithFrame:(CGRect)frame configuration:(YFScanPreviewViewConfiguration*)configuration
 {
     if (self = [super initWithFrame:frame])
     {
@@ -26,6 +31,10 @@
         self.backgroundColor = [UIColor clearColor];
     }
     return self;
+}
+
++ (instancetype)defaultPreview {
+    return [[self alloc] initWithFrame:CGRectZero];
 }
 
 - (void)startScanningAnimation
@@ -86,7 +95,7 @@
     }
     CGRect rect = self.scanCrop;
     CAShapeLayer *shapeLayer = [[CAShapeLayer alloc] init];
-    shapeLayer.lineWidth = 2;
+    shapeLayer.lineWidth = _configuration.scanCropBorderWidth;
     shapeLayer.fillColor     = [UIColor clearColor].CGColor;
     shapeLayer.strokeColor = _configuration.scanCropBorderColor.CGColor;
     shapeLayer.path          = [UIBezierPath bezierPathWithRect:rect].CGPath;;
@@ -100,24 +109,24 @@
     UIColor *fillColor = _configuration.scanCropAngleLineColor;
     CGFloat angleLineWidth = _configuration.scanCropAngleLineWidth;
     CGFloat angleLineHeight = _configuration.scanCropAngleLineHeight;
-    CGFloat angleBorderWidth = 1.0;
+    CGFloat angleBorderWidth = _configuration.scanCropBorderWidth;
     
     CGFloat offset = 0;
     switch (_configuration.scanCropAngleStyle)
     {
         case YFScanCropAngleStyleOuter:
         {
-            offset = -angleLineWidth;
+            offset = -angleLineWidth + angleBorderWidth;
         }
             break;
         case YFScanCropAngleStyleOn:
         {
-            offset = (angleLineWidth - angleBorderWidth) / 2;;
+            offset = (-angleLineWidth + angleBorderWidth) / 2;;
         }
             break;
         case YFScanCropAngleStyleInner:
         {
-            offset = angleBorderWidth;
+            offset = 0;
             
         }
             break;

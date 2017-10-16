@@ -23,4 +23,6 @@ typedef NS_ENUM(NSInteger, YFLineAnimationType) {
 
 @property (nonatomic, assign) CFTimeInterval duration;
 
++ (instancetype)defaultScanningLineAnimation;
+
 @end

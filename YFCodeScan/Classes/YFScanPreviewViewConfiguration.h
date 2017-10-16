@@ -27,6 +27,8 @@ typedef NS_ENUM(NSInteger, YFScanCropAngleStyle) {
 
 @property (nonatomic, strong) UIColor * _Nullable scanCropBorderColor;
 
+@property (nonatomic, assign) CGFloat scanCropBorderWidth;
+
 @property (nonatomic, assign) YFScanCropAngleStyle scanCropAngleStyle;
 
 @property (nonatomic, strong) id <YFScanningAnimationProtocol> _Nullable scanningAnimationItem;
@@ -39,6 +41,6 @@ typedef NS_ENUM(NSInteger, YFScanCropAngleStyle) {
 
 @property (nonatomic, strong) UIColor * _Nullable scanCropOuterFillColor;
 
-
++ (instancetype _Nullable )defaultConfiguration;
 
 @end

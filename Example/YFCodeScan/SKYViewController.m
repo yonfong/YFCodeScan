@@ -31,8 +31,9 @@
 
 - (void)configureInterface
 {
-    YFScanPreviewViewConfiguration *configuration = [[YFScanPreviewViewConfiguration alloc] init];
-    YFScanPreviewView *preview = [[YFScanPreviewView alloc] initWithFrame:self.view.bounds configuration:configuration];
+    
+    YFScanPreviewView *preview = [YFScanPreviewView defaultPreview];
+    preview.frame = self.view.bounds;
     [self.view addSubview:preview];
     
     AVCaptureVideoPreviewLayer *previewLayer = [self.scanner previewLayer];
