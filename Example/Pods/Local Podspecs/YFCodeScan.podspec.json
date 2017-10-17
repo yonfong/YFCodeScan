@@ -18,5 +18,10 @@
   "platforms": {
     "ios": "8.0"
   },
-  "source_files": "YFCodeScan/Classes/**/*"
+  "source_files": "YFCodeScan/Classes/**/*",
+  "resource_bundles": {
+    "YFCodeScan": [
+      "YFCodeScan/Assets/*.png"
+    ]
+  }
 }

@@ -29,6 +29,8 @@ typedef NS_ENUM(NSInteger,YFScanCodeType) {
 
 @property (nonatomic, copy) NSArray<AVMetadataObjectType> *metadataObjectTypes;
 
+@property (nonatomic, copy) NSString *topBarTitle;
+
 + (instancetype)scanCtrollerWith:(YFScanPreviewView *)previewView;
 
 + (instancetype)scanCtrollerWith:(YFScanPreviewView *)previewView scanCodeType:(YFScanCodeType)scanCodeType;
