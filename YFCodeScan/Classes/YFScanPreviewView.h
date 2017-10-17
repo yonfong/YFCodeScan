@@ -10,7 +10,7 @@
 
 @interface YFScanPreviewView : UIView
 
-@property (nonatomic, strong, readonly)YFScanPreviewViewConfiguration *configuration;
+@property (nonatomic, strong)YFScanPreviewViewConfiguration *configuration;
 
 - (instancetype)initWithFrame:(CGRect)frame configuration:(YFScanPreviewViewConfiguration*)configuration;
 

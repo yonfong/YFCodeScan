@@ -10,7 +10,11 @@
 
 @interface YFScanPreviewView()
 
-@property (nonatomic, strong, readwrite) YFScanPreviewViewConfiguration *configuration;
+@property (nonatomic, strong) CAShapeLayer *maskLayer;
+
+@property (nonatomic, strong) CAShapeLayer *interestRectLayer;
+
+@property (nonatomic, strong) CATextLayer *textLayer;
 
 @property (nonatomic, assign, readonly) CGRect scanCrop;
 
@@ -28,13 +32,42 @@
     if (self = [super initWithFrame:frame])
     {
         self.configuration = configuration;
-        self.backgroundColor = [UIColor clearColor];
+        [self commonInit];
     }
     return self;
 }
 
-+ (instancetype)defaultPreview {
+- (instancetype)initWithCoder:(NSCoder *)aDecoder
+{
+    if (self = [super initWithCoder:aDecoder]) {
+        [self commonInit];
+    }
+    return self;
+}
+
++ (instancetype)defaultPreview
+{
     return [[self alloc] initWithFrame:CGRectZero];
+}
+
+- (void)commonInit
+{
+    CGRect rectOfInterest = self.scanCrop;
+    self.maskLayer = [[CAShapeLayer alloc] init];
+    self.maskLayer.fillRule = kCAFillRuleEvenOdd;
+    self.maskLayer.fillColor = [UIColor blackColor].CGColor;
+    self.maskLayer.opacity = 0.6;
+    [self.layer addSublayer:self.maskLayer];
+    
+    self.interestRectLayer = [[CAShapeLayer alloc] init];
+    self.interestRectLayer.path = [[UIBezierPath bezierPathWithRect:rectOfInterest] CGPath];
+    self.interestRectLayer.fillColor = [UIColor clearColor].CGColor;
+    self.interestRectLayer.strokeColor = _configuration.scanCropBorderColor.CGColor;
+    [self.layer addSublayer:self.interestRectLayer];
+    
+    self.textLayer = [[CATextLayer alloc] init];
+    
+    [self.layer addSublayer:self.textLayer];
 }
 
 - (void)startScanningAnimation
@@ -59,54 +92,30 @@
     }
 }
 
-- (void)drawRect:(CGRect)rect
+- (void)layoutSubviews
 {
-    [self addOuterLayer];
-    [self addScanCropLayer];
+    [super layoutSubviews];
+    
+    [self configMaskLayer];
+    [self configInterestRectLayer];
     [self addScanCropAngleLayer];
     [self addTipTextLayer];
 }
 
-- (void)addOuterLayer
+- (void)configMaskLayer
 {
-    const CGFloat *components = CGColorGetComponents(_configuration.scanCropOuterFillColor.CGColor);
+    CGRect rectOfInterest = self.scanCrop;
+    UIBezierPath *path = [UIBezierPath bezierPathWithRect:CGRectMake(0, 0, CGRectGetWidth(self.bounds), CGRectGetHeight(self.bounds))];
+    [path appendPath:[UIBezierPath bezierPathWithRect:rectOfInterest]];
     
-    CGFloat colorOfRed = components[0];
-    CGFloat colorOfGreen = components[1];
-    CGFloat colorOfBlue = components[2];
-    CGFloat colorOfAlpa = components[3];
-    UIColor *fillColor = [UIColor colorWithRed:colorOfRed green:colorOfGreen blue:colorOfBlue alpha:1.0];
-    float opacity = colorOfAlpa;
-    
-    CGRect rect = self.scanCrop;
-    
-    UIBezierPath *topPath = [UIBezierPath bezierPathWithRect:CGRectMake(0, 0, CGRectGetWidth(self.bounds), rect.origin.y)];
-    
-    UIBezierPath *leftPath = [UIBezierPath bezierPathWithRect:CGRectMake(0, rect.origin.y, rect.origin.x, CGRectGetHeight(rect))];
-    
-    UIBezierPath *rightPath = [UIBezierPath bezierPathWithRect:CGRectMake(rect.origin.x + CGRectGetWidth(rect), rect.origin.y, CGRectGetWidth(self.bounds) - rect.origin.x - CGRectGetWidth(rect), CGRectGetHeight(rect))];
-    
-    UIBezierPath *bottomPath = [UIBezierPath bezierPathWithRect:CGRectMake(0, rect.origin.y + CGRectGetHeight(rect), CGRectGetWidth(self.bounds), CGRectGetHeight(self.bounds) - rect.origin.y - CGRectGetHeight(rect))];
-    
-    [self addShapeLayerWithPath:topPath fillColor:fillColor opacity:opacity];
-    [self addShapeLayerWithPath:leftPath fillColor:fillColor opacity:opacity];
-    [self addShapeLayerWithPath:rightPath fillColor:fillColor opacity:opacity];
-    [self addShapeLayerWithPath:bottomPath fillColor:fillColor opacity:opacity];
+    path.usesEvenOddFillRule = true;
+    self.maskLayer.path = [path CGPath];
 }
 
-
-- (void)addScanCropLayer
+- (void)configInterestRectLayer
 {
-    if (!_configuration.showScanCropBorder) {
-        return;
-    }
-    CGRect rect = self.scanCrop;
-    CAShapeLayer *shapeLayer = [[CAShapeLayer alloc] init];
-    shapeLayer.lineWidth = _configuration.scanCropBorderWidth;
-    shapeLayer.fillColor     = [UIColor clearColor].CGColor;
-    shapeLayer.strokeColor = _configuration.scanCropBorderColor.CGColor;
-    shapeLayer.path          = [UIBezierPath bezierPathWithRect:rect].CGPath;;
-    [self.layer addSublayer:shapeLayer];
+    CGRect rectOfInterest = self.scanCrop;
+    self.interestRectLayer.path = CGPathCreateWithRect(rectOfInterest,nil);
 }
 
 - (void)addScanCropAngleLayer
