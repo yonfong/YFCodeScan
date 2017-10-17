@@ -10,7 +10,7 @@
 
 @interface YFScanPreviewView()
 
-@property (nonatomic, strong) YFScanPreviewViewConfiguration *configuration;
+@property (nonatomic, strong, readwrite) YFScanPreviewViewConfiguration *configuration;
 
 @property (nonatomic, assign, readonly) CGRect scanCrop;
 
@@ -52,6 +52,12 @@
     }
 }
 
+- (void)didMoveToSuperview {
+    [super didMoveToSuperview];
+    if (self.superview) {
+        self.frame = self.superview.bounds;
+    }
+}
 
 - (void)drawRect:(CGRect)rect
 {
