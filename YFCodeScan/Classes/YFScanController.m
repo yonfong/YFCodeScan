@@ -9,9 +9,38 @@
 
 @interface YFScanController ()
 
+@property (nonatomic, strong, readwrite)YFScanner *scanner;
+
 @end
 
 @implementation YFScanController
+
+@synthesize metadataObjectTypes = _metadataObjectTypes;
+
+- (instancetype)init
+{
+    return [self initWithPreviewView:nil scanCodeType:YFScanCodeTypeQRAndBarCode];
+}
+
+- (instancetype)initWithPreviewView:(YFScanPreviewView *)previewView scanCodeType:(YFScanCodeType)scanCodeType
+{
+    if (self = [super init]) {
+        _preivewView = previewView;
+        _scanCodeType = scanCodeType;
+        _enableInterestRect = YES;
+    }
+    return self;
+}
+
++ (instancetype)scanCtrollerWith:(YFScanPreviewView *)previewView
+{
+    return [self scanCtrollerWith:previewView scanCodeType:YFScanCodeTypeQRAndBarCode];
+}
+
++ (instancetype)scanCtrollerWith:(YFScanPreviewView *)previewView scanCodeType:(YFScanCodeType)scanCodeType
+{
+    return [[self alloc] initWithPreviewView:previewView scanCodeType:scanCodeType];
+}
 
 - (void)viewDidLoad
 {
@@ -42,6 +71,7 @@
                         self.scannedHandle(scannedResult);
                     }
                 }];
+                self.scanner.metadataObjectTypes = self.metadataObjectTypes;
             }
             [self startScanning];
         } else {
@@ -131,6 +161,42 @@
                 break;
                 
         }
+    }
+}
+
+#pragma mark - getters && setters
+- (void)setMetadataObjectTypes:(NSArray<AVMetadataObjectType> *)metadataObjectTypes
+{
+    if (_metadataObjectTypes == metadataObjectTypes) {
+        return;
+    }
+    
+    if (metadataObjectTypes && metadataObjectTypes.count > 0) {
+        _metadataObjectTypes = metadataObjectTypes;
+    } else {
+        _metadataObjectTypes = [self defaultMetaDataObjectTypes];
+    }
+}
+
+-(NSArray<AVMetadataObjectType> *)metadataObjectTypes
+{
+    if (!_metadataObjectTypes) {
+        _metadataObjectTypes = [self defaultMetaDataObjectTypes];
+    }
+    return _metadataObjectTypes;
+}
+
+- (NSArray *)defaultMetaDataObjectTypes
+{
+    NSArray *qrCodeTypes = @[AVMetadataObjectTypeQRCode];
+    NSArray *barCodeTypes = @[AVMetadataObjectTypeEAN13Code,AVMetadataObjectTypeEAN8Code,AVMetadataObjectTypeCode128Code];
+
+    if (self.scanCodeType == YFScanCodeTypeQRCode) {
+        return qrCodeTypes;
+    } else if (self.scanCodeType == YFScanCodeTypeBarCode) {
+        return barCodeTypes;
+    } else {
+        return [[NSArray arrayWithArray:qrCodeTypes] arrayByAddingObjectsFromArray:barCodeTypes];
     }
 }
 
