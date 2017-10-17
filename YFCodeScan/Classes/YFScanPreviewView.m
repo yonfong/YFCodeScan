@@ -58,6 +58,7 @@
     [self addOuterLayer];
     [self addScanCropLayer];
     [self addScanCropAngleLayer];
+    [self addTipTextLayer];
 }
 
 - (void)addOuterLayer
@@ -165,6 +166,37 @@
     [self addShapeLayerWithPath:bottomLeftHorPath fillColor:fillColor opacity:1.0];
     [self addShapeLayerWithPath:bottomRithtVerPath fillColor:fillColor opacity:1.0];
     [self addShapeLayerWithPath:bottomRithtHorPath fillColor:fillColor opacity:1.0];
+}
+
+- (void)addTipTextLayer
+{
+    NSString *tipText = self.configuration.tipText;
+    if (!tipText) {
+        return;
+    }
+    CGSize textSize = [self calculateTitleSizeWithString:tipText];
+    
+    CATextLayer *textLayer = [CATextLayer new];
+    textLayer.bounds = CGRectMake(0, 0, textSize.width, textSize.height);
+    textLayer.string = tipText;
+    textLayer.fontSize = 12;
+    textLayer.alignmentMode = kCAAlignmentCenter;
+    textLayer.truncationMode = kCATruncationEnd;
+    textLayer.foregroundColor = [UIColor whiteColor].CGColor;
+    textLayer.contentsScale = [[UIScreen mainScreen] scale];
+    
+    CGRect rect = self.scanCrop;
+    
+    textLayer.position = CGPointMake(rect.origin.x + CGRectGetWidth(rect) / 2, rect.origin.y + CGRectGetHeight(rect) + textSize.height);
+    
+    [self.layer addSublayer:textLayer];
+}
+
+- (CGSize)calculateTitleSizeWithString:(NSString *)string
+{
+    NSDictionary *dic = @{NSFontAttributeName: [UIFont systemFontOfSize:12]};
+    CGSize size = [string boundingRectWithSize:CGSizeMake(280, 0) options:NSStringDrawingTruncatesLastVisibleLine | NSStringDrawingUsesLineFragmentOrigin | NSStringDrawingUsesFontLeading attributes:dic context:nil].size;
+    return CGSizeMake(ceilf(size.width)+2, size.height);
 }
 
 - (void)addShapeLayerWithPath:(UIBezierPath *)path fillColor:(UIColor *)color opacity:(float)opacity {

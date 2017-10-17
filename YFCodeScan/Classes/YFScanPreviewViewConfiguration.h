@@ -41,6 +41,8 @@ typedef NS_ENUM(NSInteger, YFScanCropAngleStyle) {
 
 @property (nonatomic, strong) UIColor * _Nullable scanCropOuterFillColor;
 
+@property (nonatomic, copy) NSString * _Nullable tipText;
+
 + (instancetype _Nullable )defaultConfiguration;
 
 @end

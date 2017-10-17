@@ -27,6 +27,8 @@
         _scanCropBorderColor = [UIColor whiteColor];
         _scanCropAngleLineColor = [UIColor greenColor];
         _scanCropOuterFillColor = [UIColor colorWithRed:0 green:0 blue:0 alpha:0.6];
+        
+        _tipText = @"将二维码/条形码放入取景框即可自动扫描";
     }
     return self;
 }
