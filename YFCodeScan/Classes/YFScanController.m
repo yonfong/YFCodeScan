@@ -31,12 +31,14 @@ static NSString * const kPodName = @"YFCodeScan";
 
 - (instancetype)init
 {
-    return [self initWithPreviewView:nil scanCodeType:YFScanCodeTypeQRAndBarCode];
+    YFScanPreviewView *previewView = [[YFScanPreviewView alloc] initWithFrame:CGRectZero];
+    return [self initWithPreviewView:previewView scanCodeType:YFScanCodeTypeQRAndBarCode];
 }
 
 - (instancetype)initWithPreviewView:(YFScanPreviewView *)previewView scanCodeType:(YFScanCodeType)scanCodeType
 {
     if (self = [super init]) {
+        _scanner = [[YFScanner alloc] init];
         _topBarTitle = @"扫一扫";
         _preivewView = previewView;
         _scanCodeType = scanCodeType;
@@ -76,6 +78,11 @@ static NSString * const kPodName = @"YFCodeScan";
     [self.view addSubview:self.preivewView];
     [self configTopBar];
     
+    [self checkCameraPemission];
+    dispatch_async(self.scanner.sessionQueue, ^{
+        [self.scanner setupCaptureSession];
+    });
+    
     self.preIdleTimerDisabled = [UIApplication sharedApplication].idleTimerDisabled;
     self.preNavigationBarHidden = self.navigationController.navigationBarHidden;
     self.preStatusBarStyle = [UIApplication sharedApplication].statusBarStyle;
@@ -89,46 +96,59 @@ static NSString * const kPodName = @"YFCodeScan";
     [UIApplication sharedApplication].statusBarStyle = UIStatusBarStyleLightContent;
     
     __weak __typeof(self) weakSelf = self;
-    [self requestCameraPemissionWithResult:^(BOOL granted) {
-        if (granted) {
-            if (!weakSelf.scanner) {
-                CGRect interestRect = CGRectZero;
-                if (weakSelf.enableInterestRect) {
-                    interestRect = [weakSelf.preivewView getRectOfInterest];
-                }
-                weakSelf.scanner = [[YFScanner alloc] initWithScanCrop:interestRect scanSuccess:^(NSString * _Nonnull scannedResult) {
-                    if (weakSelf.scannedHandle) {
-                        weakSelf.scannedHandle(scannedResult);
+    dispatch_async(self.scanner.sessionQueue, ^{
+        switch (weakSelf.scanner.sessionSetupResult) {
+            case YFSessionSetupResultSuccess:
+            {
+                [weakSelf.scanner startScanning];
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    [weakSelf.preivewView startScanningAnimation];
+                    AVCaptureVideoPreviewLayer *previewLayer = [self.scanner previewLayer];
+                    if (previewLayer && ![self.preivewView.layer.sublayers containsObject:previewLayer]) {
+                        previewLayer.frame = self.preivewView.layer.bounds;
+                        previewLayer.videoGravity = AVLayerVideoGravityResizeAspectFill;
+                        [weakSelf.preivewView.layer insertSublayer:previewLayer atIndex:0];
                     }
-                }];
-                weakSelf.scanner.metadataObjectTypes = weakSelf.metadataObjectTypes;
+                });
             }
-            [weakSelf startScanning];
-        } else {
-            NSDictionary *infoDictionary = [[NSBundle mainBundle] infoDictionary];
-            NSString *appName = [infoDictionary objectForKey:@"CFBundleDisplayName"];
-            NSString *message = [NSString stringWithFormat:@"请在iPhone的\"设置-隐私-相机\"中允许%@访问你的相机",appName];
-
-            UIAlertController *alertCtl = [UIAlertController alertControllerWithTitle:@"相机被禁用" message:message preferredStyle:UIAlertControllerStyleAlert];
-
-            UIAlertAction *sureAction = [UIAlertAction actionWithTitle:@"确定" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
-                NSURL *settingURL = [NSURL URLWithString:UIApplicationOpenSettingsURLString];
-                if ([[UIApplication sharedApplication] canOpenURL:settingURL]) {
-                    [[UIApplication sharedApplication] openURL:settingURL];
-                }
-            }];
-            [alertCtl addAction:sureAction];
-
-            [weakSelf presentViewController:alertCtl animated:YES completion:nil];
+                break;
+            case YFSessionSetupResultFailed:
+            {
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    UIAlertController *alertCtl = [UIAlertController alertControllerWithTitle:@"无法捕获图像" message:@"" preferredStyle:UIAlertControllerStyleAlert];
+                    
+                    UIAlertAction *sureAction = [UIAlertAction actionWithTitle:@"确定" style:UIAlertActionStyleCancel handler:nil];
+                    [alertCtl addAction:sureAction];
+                    [weakSelf presentViewController:alertCtl animated:YES completion:nil];
+                });
+            }
+                break;
+                
+            case YFSessionSetupResultNotAuthorized:
+            {
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    NSDictionary *infoDictionary = [[NSBundle mainBundle] infoDictionary];
+                    NSString *appName = [infoDictionary objectForKey:@"CFBundleDisplayName"];
+                    NSString *message = [NSString stringWithFormat:@"请在iPhone的\"设置-隐私-相机\"中允许%@访问你的相机",appName];
+                    
+                    UIAlertController *alertCtl = [UIAlertController alertControllerWithTitle:@"相机被禁用" message:message preferredStyle:UIAlertControllerStyleAlert];
+                    
+                    UIAlertAction *sureAction = [UIAlertAction actionWithTitle:@"确定" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+                        NSURL *settingURL = [NSURL URLWithString:UIApplicationOpenSettingsURLString];
+                        if ([[UIApplication sharedApplication] canOpenURL:settingURL]) {
+                            [[UIApplication sharedApplication] openURL:settingURL];
+                        }
+                    }];
+                    [alertCtl addAction:sureAction];
+                    
+                    [weakSelf presentViewController:alertCtl animated:YES completion:nil];
+                });
+            }
+                break;
+            default:
+                break;
         }
-    }];
-    
-    AVCaptureVideoPreviewLayer *previewLayer = [self.scanner previewLayer];
-    if (previewLayer && ![self.preivewView.layer.sublayers containsObject:previewLayer]) {
-        previewLayer.frame = self.preivewView.layer.bounds;
-        previewLayer.videoGravity = AVLayerVideoGravityResizeAspectFill;
-        [self.preivewView.layer insertSublayer:previewLayer atIndex:0];
-    }
+    });
 }
 
 - (void)viewWillDisappear:(BOOL)animated
@@ -139,13 +159,6 @@ static NSString * const kPodName = @"YFCodeScan";
     [UIApplication sharedApplication].idleTimerDisabled = self.preIdleTimerDisabled;
     self.navigationController.navigationBarHidden = self.preNavigationBarHidden;
     [UIApplication sharedApplication].statusBarStyle = self.preStatusBarStyle;
-}
-
-- (void)viewDidAppear:(BOOL)animated
-{
-    [super viewDidAppear:animated];
-    
-    [self.preivewView startScanningAnimation];
 }
 
 - (void)configTopBar {
@@ -235,35 +248,31 @@ static NSString * const kPodName = @"YFCodeScan";
     return UIStatusBarStyleLightContent;
 }
 
-- (void)requestCameraPemissionWithResult:(void(^)( BOOL granted))completion
-{
-    if ([AVCaptureDevice respondsToSelector:@selector(authorizationStatusForMediaType:)])
-    {
+- (void)checkCameraPemission {
+    if ([AVCaptureDevice respondsToSelector:@selector(authorizationStatusForMediaType:)]) {
         AVAuthorizationStatus permission =
         [AVCaptureDevice authorizationStatusForMediaType:AVMediaTypeVideo];
         
         switch (permission) {
             case AVAuthorizationStatusAuthorized:
-                completion(YES);
+                self.scanner.sessionSetupResult = YFSessionSetupResultSuccess;
                 break;
-            case AVAuthorizationStatusDenied:
-            case AVAuthorizationStatusRestricted:
-                completion(NO);
-                break;
+
             case AVAuthorizationStatusNotDetermined:
             {
+                dispatch_suspend(self.scanner.sessionQueue);
                 [AVCaptureDevice requestAccessForMediaType:AVMediaTypeVideo
                                          completionHandler:^(BOOL granted) {
-                                             dispatch_async(dispatch_get_main_queue(), ^{
-                                                 if (granted) {
-                                                     completion(true);
-                                                 } else {
-                                                     completion(false);
-                                                 }
-                                             });
+                                             if (!granted) {
+                                                 self.scanner.sessionSetupResult = YFSessionSetupResultNotAuthorized;
+                                             }
+                                             dispatch_resume(self.scanner.sessionQueue);
                                          }];
             }
                 break;
+                
+            default:
+                self.scanner.sessionSetupResult = YFSessionSetupResultNotAuthorized;
                 
         }
     }
