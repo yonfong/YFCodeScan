@@ -57,6 +57,12 @@ static NSString * const kPodName = @"YFCodeScan";
 
 #pragma mark - lifeCycle
 
+- (void)dealloc
+{
+    NSLog(@"%s",__FUNCTION__);
+}
+
+
 - (void)viewDidLoad
 {
     [super viewDidLoad];
@@ -81,21 +87,23 @@ static NSString * const kPodName = @"YFCodeScan";
     [UIApplication sharedApplication].idleTimerDisabled = YES;
     self.navigationController.navigationBarHidden = YES;
     [UIApplication sharedApplication].statusBarStyle = UIStatusBarStyleLightContent;
+    
+    __weak __typeof(self) weakSelf = self;
     [self requestCameraPemissionWithResult:^(BOOL granted) {
         if (granted) {
-            if (!self.scanner) {
+            if (!weakSelf.scanner) {
                 CGRect interestRect = CGRectZero;
-                if (self.enableInterestRect) {
-                    interestRect = [self.preivewView getRectOfInterest];
+                if (weakSelf.enableInterestRect) {
+                    interestRect = [weakSelf.preivewView getRectOfInterest];
                 }
-                self.scanner = [[YFScanner alloc] initWithScanCrop:interestRect scanSuccess:^(NSString * _Nonnull scannedResult) {
-                    if (self.scannedHandle) {
-                        self.scannedHandle(scannedResult);
+                weakSelf.scanner = [[YFScanner alloc] initWithScanCrop:interestRect scanSuccess:^(NSString * _Nonnull scannedResult) {
+                    if (weakSelf.scannedHandle) {
+                        weakSelf.scannedHandle(scannedResult);
                     }
                 }];
-                self.scanner.metadataObjectTypes = self.metadataObjectTypes;
+                weakSelf.scanner.metadataObjectTypes = weakSelf.metadataObjectTypes;
             }
-            [self startScanning];
+            [weakSelf startScanning];
         } else {
             NSDictionary *infoDictionary = [[NSBundle mainBundle] infoDictionary];
             NSString *appName = [infoDictionary objectForKey:@"CFBundleDisplayName"];
@@ -111,7 +119,7 @@ static NSString * const kPodName = @"YFCodeScan";
             }];
             [alertCtl addAction:sureAction];
 
-            [self presentViewController:alertCtl animated:YES completion:nil];
+            [weakSelf presentViewController:alertCtl animated:YES completion:nil];
         }
     }];
     
