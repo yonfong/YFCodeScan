@@ -11,6 +11,10 @@
 
 @property (nonatomic, strong, readwrite)YFScanner *scanner;
 
+@property (nonatomic, assign) BOOL preIdleTimerDisabled;
+
+@property (nonatomic, assign) BOOL preNavigationBarHidden;
+
 @end
 
 @implementation YFScanController
@@ -53,11 +57,15 @@
         self.preivewView = previewView;
     }
     [self.view addSubview:self.preivewView];
+    self.preIdleTimerDisabled = [UIApplication sharedApplication].idleTimerDisabled;
+    self.preNavigationBarHidden = self.navigationController.navigationBarHidden;
 }
 
 - (void)viewWillAppear:(BOOL)animated
 {
     [super viewWillAppear:animated];
+    [UIApplication sharedApplication].idleTimerDisabled = YES;
+    self.navigationController.navigationBarHidden = YES;
     
     [self requestCameraPemissionWithResult:^(BOOL granted) {
         if (granted) {
@@ -106,13 +114,13 @@
     [super viewWillDisappear:animated];
     
     [self stopScanning];
+    [UIApplication sharedApplication].idleTimerDisabled = self.preIdleTimerDisabled;
+    self.navigationController.navigationBarHidden = self.preNavigationBarHidden;
 }
 
 - (void)viewDidAppear:(BOOL)animated
 {
     [super viewDidAppear:animated];
-    
-
     
     [self.preivewView startScanningAnimation];
 }
