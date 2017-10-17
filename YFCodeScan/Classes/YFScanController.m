@@ -45,10 +45,17 @@
             }
             [self startScanning];
         } else {
-            UIAlertController *alertCtl = [UIAlertController alertControllerWithTitle:@"相机被禁用" message:@"请到设置隐私中开启本程序相机权限" preferredStyle:UIAlertControllerStyleAlert];
+            NSDictionary *infoDictionary = [[NSBundle mainBundle] infoDictionary];
+            NSString *appName = [infoDictionary objectForKey:@"CFBundleDisplayName"];
+            NSString *message = [NSString stringWithFormat:@"请在iPhone的\"设置-隐私-相机\"中允许%@访问你的相机",appName];
+            
+            UIAlertController *alertCtl = [UIAlertController alertControllerWithTitle:@"相机被禁用" message:message preferredStyle:UIAlertControllerStyleAlert];
             
             UIAlertAction *sureAction = [UIAlertAction actionWithTitle:@"确定" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
-                NSLog(@"go to setting");
+                NSURL *settingURL = [NSURL URLWithString:UIApplicationOpenSettingsURLString];
+                if ([[UIApplication sharedApplication] canOpenURL:settingURL]) {
+                    [[UIApplication sharedApplication] openURL:settingURL];
+                }
             }];
             [alertCtl addAction:sureAction];
             
