@@ -315,6 +315,7 @@ static NSString * const kPodName = @"YFCodeScan";
 - (void)setScannedHandle:(void (^)(NSString *))scannedHandle
 {
     if (_scannedHandle != scannedHandle) {
+        _scannedHandle = scannedHandle;
         self.scanner.scanSuccessResult = scannedHandle;
     }
 }
