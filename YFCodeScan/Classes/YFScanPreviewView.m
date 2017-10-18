@@ -138,7 +138,7 @@
     path.usesEvenOddFillRule = true;
     self.maskLayer.path = [path CGPath];
     
-    const CGFloat *components = CGColorGetComponents(_configuration.scanCropOuterFillColor.CGColor);
+    const CGFloat *components = CGColorGetComponents(_configuration.maskFillColor.CGColor);
     CGFloat colorOfRed = components[0];
     CGFloat colorOfGreen = components[1];
     CGFloat colorOfBlue = components[2];
@@ -155,16 +155,16 @@
     CGRect rectOfInterest = self.scanCrop;
     self.interestRectLayer.path = CGPathCreateWithRect(rectOfInterest,nil);
     self.interestRectLayer.lineWidth = _configuration.scanCropBorderWidth;
-    self.interestRectLayer.strokeColor = _configuration.scanCropBorderColor.CGColor;
+    self.interestRectLayer.strokeColor = _configuration.showScanCropBorder ? _configuration.scanCropBorderColor.CGColor : [UIColor clearColor].CGColor;
 }
 
 - (void)configInterestRectAngleLayer
 {
     CGRect rectOfInterest = self.scanCrop;
     
-    UIColor *fillColor = _configuration.scanCropAngleLineColor;
-    CGFloat angleLineWidth = _configuration.scanCropAngleLineWidth;
-    CGFloat angleLineHeight = _configuration.scanCropAngleLineHeight;
+    UIColor *fillColor = _configuration.angleLineColor;
+    CGFloat angleLineWidth = _configuration.angleLineWidth;
+    CGFloat angleLineHeight = _configuration.angleLineHeight;
     CGFloat scanCropBorderWidth = _configuration.scanCropBorderWidth;
     
     UIBezierPath *anglePath = [UIBezierPath bezierPathWithRect:CGRectMake(0, 0, angleLineWidth, angleLineHeight)];
@@ -177,12 +177,12 @@
     
     CGFloat offset = 0;
     
-    YFScanCropAngleStyle angleStyle = _configuration.scanCropAngleStyle;
-    if (angleStyle == YFScanCropAngleStyleOuter) {
+    YFScanCropAngleAttachment angleAttachment = _configuration.angleAttachment;
+    if (angleAttachment == YFScanCropAngleAttachmentOuter) {
         offset = -angleLineWidth + scanCropBorderWidth;
-    } else if (angleStyle == YFScanCropAngleStyleInner) {
+    } else if (angleAttachment == YFScanCropAngleAttachmentInner) {
         offset = -scanCropBorderWidth;
-    } else if (angleStyle == YFScanCropAngleStyleOn) {
+    } else if (angleAttachment == YFScanCropAngleAttachmentOn) {
         offset = (-angleLineWidth + scanCropBorderWidth) / 2;
     }
     

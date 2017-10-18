@@ -19,14 +19,14 @@
         _scanCropAspectRatio = 1.0;
         
         _scanCropBorderWidth = 0.5;
-        _scanCropAngleLineWidth = 2.0;
-        _scanCropAngleLineHeight = 20;
-        _scanCropAngleStyle = YFScanCropAngleStyleInner;
+        _angleLineWidth = 2.0;
+        _angleLineHeight = 20;
+        _angleAttachment = YFScanCropAngleAttachmentInner;
         _scanningAnimationItem = [[YFScanningLineAnimation alloc] init];
         
         _scanCropBorderColor = [UIColor whiteColor];
-        _scanCropAngleLineColor = [UIColor greenColor];
-        _scanCropOuterFillColor = [UIColor colorWithRed:0 green:0 blue:0 alpha:0.6];
+        _angleLineColor = [UIColor greenColor];
+        _maskFillColor = [UIColor colorWithRed:0 green:0 blue:0 alpha:0.6];
         
         _tipText = @"将二维码/条形码放入取景框即可自动扫描";
     }

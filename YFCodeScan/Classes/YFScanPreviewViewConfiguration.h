@@ -8,10 +8,10 @@
 #import <Foundation/Foundation.h>
 #import "YFScanningAnimationProtocol.h"
 
-typedef NS_ENUM(NSInteger, YFScanCropAngleStyle) {
-    YFScanCropAngleStyleOuter,
-    YFScanCropAngleStyleInner,
-    YFScanCropAngleStyleOn
+typedef NS_ENUM(NSInteger, YFScanCropAngleAttachment) {
+    YFScanCropAngleAttachmentOuter,
+    YFScanCropAngleAttachmentInner,
+    YFScanCropAngleAttachmentOn
 };
 
 
@@ -29,17 +29,17 @@ typedef NS_ENUM(NSInteger, YFScanCropAngleStyle) {
 
 @property (nonatomic, assign) CGFloat scanCropBorderWidth;
 
-@property (nonatomic, assign) YFScanCropAngleStyle scanCropAngleStyle;
+@property (nonatomic, assign) YFScanCropAngleAttachment angleAttachment;
 
 @property (nonatomic, strong) id <YFScanningAnimationProtocol> _Nullable scanningAnimationItem;
 
-@property (nonatomic, strong) UIColor * _Nullable scanCropAngleLineColor;
+@property (nonatomic, strong) UIColor * _Nullable angleLineColor;
 
-@property (nonatomic, assign) CGFloat scanCropAngleLineWidth;
+@property (nonatomic, assign) CGFloat angleLineWidth;
 
-@property (nonatomic, assign) CGFloat scanCropAngleLineHeight;
+@property (nonatomic, assign) CGFloat angleLineHeight;
 
-@property (nonatomic, strong) UIColor * _Nullable scanCropOuterFillColor;
+@property (nonatomic, strong) UIColor * _Nullable maskFillColor;
 
 @property (nonatomic, copy) NSString * _Nullable tipText;
 
