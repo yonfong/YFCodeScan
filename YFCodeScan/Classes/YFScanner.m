@@ -121,7 +121,7 @@
     BOOL success = [self addOutput:self.metadataOutput toCaptureSession:captureSession];
     if (success) {
         [self.metadataOutput setMetadataObjectsDelegate:self queue:self.metadataObjectsQueue];
-        self.metadataOutput.metadataObjectTypes = self.metadataOutput.availableMetadataObjectTypes;
+        self.metadataObjectTypes = self.metadataObjectTypes;
     }
     
     return success;

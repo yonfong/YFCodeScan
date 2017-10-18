@@ -31,9 +31,7 @@ typedef NS_ENUM(NSInteger,YFScanCodeType) {
 
 @property (nonatomic, copy) NSString *topBarTitle;
 
-+ (instancetype)scanCtrollerWith:(YFScanPreviewView *)previewView;
-
-+ (instancetype)scanCtrollerWith:(YFScanPreviewView *)previewView scanCodeType:(YFScanCodeType)scanCodeType;
++ (instancetype)defaultScanCtroller;
 
 - (void)startScanning;
 

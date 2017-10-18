@@ -31,30 +31,32 @@ static NSString * const kPodName = @"YFCodeScan";
 
 - (instancetype)init
 {
-    YFScanPreviewView *previewView = [[YFScanPreviewView alloc] initWithFrame:CGRectZero];
-    return [self initWithPreviewView:previewView scanCodeType:YFScanCodeTypeQRAndBarCode];
-}
-
-- (instancetype)initWithPreviewView:(YFScanPreviewView *)previewView scanCodeType:(YFScanCodeType)scanCodeType
-{
     if (self = [super init]) {
-        _scanner = [[YFScanner alloc] init];
-        _topBarTitle = @"扫一扫";
-        _preivewView = previewView;
-        _scanCodeType = scanCodeType;
-        _enableInterestRect = YES;
+        [self commonInit];
     }
     return self;
 }
 
-+ (instancetype)scanCtrollerWith:(YFScanPreviewView *)previewView
+- (instancetype)initWithCoder:(NSCoder *)aDecoder
 {
-    return [self scanCtrollerWith:previewView scanCodeType:YFScanCodeTypeQRAndBarCode];
+    if (self = [super initWithCoder:aDecoder]) {
+        [self commonInit];
+    }
+    return self;
 }
 
-+ (instancetype)scanCtrollerWith:(YFScanPreviewView *)previewView scanCodeType:(YFScanCodeType)scanCodeType
++ (instancetype)defaultScanCtroller
 {
-    return [[self alloc] initWithPreviewView:previewView scanCodeType:scanCodeType];
+    return [[self alloc] init];
+}
+
+- (void)commonInit
+{
+    _scanner = [[YFScanner alloc] init];
+    _topBarTitle = @"扫一扫";
+    _preivewView = [YFScanPreviewView defaultPreview];
+    _scanCodeType = YFScanCodeTypeQRAndBarCode;
+    _enableInterestRect = YES;
 }
 
 #pragma mark - lifeCycle
@@ -81,6 +83,7 @@ static NSString * const kPodName = @"YFCodeScan";
     [self checkCameraPemission];
     dispatch_async(self.scanner.sessionQueue, ^{
         [self.scanner setupCaptureSession];
+        self.scanner.metadataObjectTypes = self.metadataObjectTypes;
     });
     
     self.preIdleTimerDisabled = [UIApplication sharedApplication].idleTimerDisabled;
@@ -307,6 +310,22 @@ static NSString * const kPodName = @"YFCodeScan";
         _topBarView.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0.7];
     }
     return _topBarView;
+}
+
+- (void)setScannedHandle:(void (^)(NSString *))scannedHandle
+{
+    if (_scannedHandle != scannedHandle) {
+        self.scanner.scanSuccessResult = scannedHandle;
+    }
+}
+
+- (void)setScanCodeType:(YFScanCodeType)scanCodeType
+{
+    if (_scanCodeType != scanCodeType) {
+        _scanCodeType = scanCodeType;
+        
+        self.metadataObjectTypes = [self defaultMetaDataObjectTypes];
+    }
 }
 
 - (NSArray *)defaultMetaDataObjectTypes
