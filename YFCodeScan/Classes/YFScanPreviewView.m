@@ -14,7 +14,15 @@
 
 @property (nonatomic, strong) CAShapeLayer *interestRectLayer;
 
-@property (nonatomic, strong) CATextLayer *textLayer;
+@property (nonatomic, strong) CATextLayer *tipTextLayer;
+
+@property (nonatomic, strong) CAShapeLayer *topLeftAngleLayer;
+
+@property (nonatomic, strong) CAShapeLayer *topRightAngleLayer;
+
+@property (nonatomic, strong) CAShapeLayer *bottomLeftAngleLayer;
+
+@property (nonatomic, strong) CAShapeLayer *bottomRightAngleLayer;
 
 @property (nonatomic, assign, readonly) CGRect scanCrop;
 
@@ -31,7 +39,7 @@
 {
     if (self = [super initWithFrame:frame])
     {
-        self.configuration = configuration;
+        _configuration = configuration;
         [self commonInit];
     }
     return self;
@@ -55,19 +63,33 @@
     CGRect rectOfInterest = self.scanCrop;
     self.maskLayer = [[CAShapeLayer alloc] init];
     self.maskLayer.fillRule = kCAFillRuleEvenOdd;
-    self.maskLayer.fillColor = [UIColor blackColor].CGColor;
-    self.maskLayer.opacity = 0.6;
     [self.layer addSublayer:self.maskLayer];
     
     self.interestRectLayer = [[CAShapeLayer alloc] init];
     self.interestRectLayer.path = [[UIBezierPath bezierPathWithRect:rectOfInterest] CGPath];
     self.interestRectLayer.fillColor = [UIColor clearColor].CGColor;
-    self.interestRectLayer.strokeColor = _configuration.scanCropBorderColor.CGColor;
     [self.layer addSublayer:self.interestRectLayer];
     
-    self.textLayer = [[CATextLayer alloc] init];
+    self.tipTextLayer = [[CATextLayer alloc] init];
+    self.tipTextLayer.fontSize = 13;
+    self.tipTextLayer.alignmentMode = kCAAlignmentCenter;
+    self.tipTextLayer.truncationMode = kCATruncationEnd;
+    self.tipTextLayer.foregroundColor = [UIColor whiteColor].CGColor;
+    self.tipTextLayer.contentsScale = [[UIScreen mainScreen] scale];
+    [self.layer addSublayer:self.tipTextLayer];
     
-    [self.layer addSublayer:self.textLayer];
+    self.topLeftAngleLayer = [[CAShapeLayer alloc] init];
+    [self.layer addSublayer:self.topLeftAngleLayer];
+    
+    self.topRightAngleLayer = [[CAShapeLayer alloc] init];
+    [self.layer addSublayer:self.topRightAngleLayer];
+    
+    self.bottomLeftAngleLayer = [[CAShapeLayer alloc] init];
+    [self.layer addSublayer:self.bottomLeftAngleLayer];
+    
+    self.bottomRightAngleLayer = [[CAShapeLayer alloc] init];
+    [self.layer addSublayer:self.bottomRightAngleLayer];
+    
 }
 
 - (void)startScanningAnimation
@@ -95,11 +117,17 @@
 - (void)layoutSubviews
 {
     [super layoutSubviews];
+
+    // Disable CoreAnimation actions so that the positions of the sublayers immediately move to their new position.
+    [CATransaction begin];
+    [CATransaction setDisableActions:YES];
     
     [self configMaskLayer];
     [self configInterestRectLayer];
-    [self addScanCropAngleLayer];
-    [self addTipTextLayer];
+    [self configInterestRectAngleLayer];
+    [self configTipTextLayer];
+    
+    [CATransaction commit];
 }
 
 - (void)configMaskLayer
@@ -107,119 +135,96 @@
     CGRect rectOfInterest = self.scanCrop;
     UIBezierPath *path = [UIBezierPath bezierPathWithRect:CGRectMake(0, 0, CGRectGetWidth(self.bounds), CGRectGetHeight(self.bounds))];
     [path appendPath:[UIBezierPath bezierPathWithRect:rectOfInterest]];
-    
     path.usesEvenOddFillRule = true;
     self.maskLayer.path = [path CGPath];
+    
+    const CGFloat *components = CGColorGetComponents(_configuration.scanCropOuterFillColor.CGColor);
+    CGFloat colorOfRed = components[0];
+    CGFloat colorOfGreen = components[1];
+    CGFloat colorOfBlue = components[2];
+    CGFloat colorOfAlpa = components[3];
+    UIColor *fillColor = [UIColor colorWithRed:colorOfRed green:colorOfGreen blue:colorOfBlue alpha:1.0];
+    float opacity = colorOfAlpa;
+
+    self.maskLayer.opacity = opacity;
+    self.maskLayer.fillColor = fillColor.CGColor;
 }
 
 - (void)configInterestRectLayer
 {
     CGRect rectOfInterest = self.scanCrop;
     self.interestRectLayer.path = CGPathCreateWithRect(rectOfInterest,nil);
+    self.interestRectLayer.lineWidth = _configuration.scanCropBorderWidth;
+    self.interestRectLayer.strokeColor = _configuration.scanCropBorderColor.CGColor;
 }
 
-- (void)addScanCropAngleLayer
+- (void)configInterestRectAngleLayer
 {
-    CGRect rect = self.scanCrop;
+    CGRect rectOfInterest = self.scanCrop;
     
     UIColor *fillColor = _configuration.scanCropAngleLineColor;
     CGFloat angleLineWidth = _configuration.scanCropAngleLineWidth;
     CGFloat angleLineHeight = _configuration.scanCropAngleLineHeight;
-    CGFloat angleBorderWidth = _configuration.scanCropBorderWidth;
+    CGFloat scanCropBorderWidth = _configuration.scanCropBorderWidth;
+    
+    UIBezierPath *anglePath = [UIBezierPath bezierPathWithRect:CGRectMake(0, 0, angleLineWidth, angleLineHeight)];
+    [anglePath appendPath:[UIBezierPath bezierPathWithRect:CGRectMake(0, 0, angleLineHeight, angleLineWidth)]];
+    
+    self.topLeftAngleLayer.fillColor = fillColor.CGColor;
+    self.topRightAngleLayer.fillColor = fillColor.CGColor;
+    self.bottomLeftAngleLayer.fillColor = fillColor.CGColor;
+    self.bottomRightAngleLayer.fillColor = fillColor.CGColor;
     
     CGFloat offset = 0;
-    switch (_configuration.scanCropAngleStyle)
-    {
-        case YFScanCropAngleStyleOuter:
-        {
-            offset = -angleLineWidth + angleBorderWidth;
-        }
-            break;
-        case YFScanCropAngleStyleOn:
-        {
-            offset = (-angleLineWidth + angleBorderWidth) / 2;;
-        }
-            break;
-        case YFScanCropAngleStyleInner:
-        {
-            offset = 0;
-            
-        }
-            break;
-            
-        default:
-        {
-            offset = angleBorderWidth;
-        }
-            break;
+    
+    YFScanCropAngleStyle angleStyle = _configuration.scanCropAngleStyle;
+    if (angleStyle == YFScanCropAngleStyleOuter) {
+        offset = -angleLineWidth + scanCropBorderWidth;
+    } else if (angleStyle == YFScanCropAngleStyleInner) {
+        offset = -scanCropBorderWidth;
+    } else if (angleStyle == YFScanCropAngleStyleOn) {
+        offset = (-angleLineWidth + scanCropBorderWidth) / 2;
     }
     
-    CGSize pathVerticalSize = CGSizeMake(angleLineWidth, angleLineHeight);
-    CGSize pathHorizontalSize = CGSizeMake(angleLineHeight, angleLineWidth);
+    self.topLeftAngleLayer.path = anglePath.CGPath;
+    self.topLeftAngleLayer.position = CGPointMake(rectOfInterest.origin.x + offset, rectOfInterest.origin.y + offset);
     
-    UIBezierPath *topLeftVerPath = [UIBezierPath bezierPathWithRect:CGRectMake(rect.origin.x + offset, rect.origin.y + offset, pathVerticalSize.width, pathVerticalSize.height)];
+    [anglePath applyTransform:CGAffineTransformMakeRotation(M_PI_2)];
+    self.topRightAngleLayer.path = anglePath.CGPath;
+    self.topRightAngleLayer.position = CGPointMake(rectOfInterest.origin.x + CGRectGetWidth(rectOfInterest) - offset, rectOfInterest.origin.y + offset);
     
-    UIBezierPath *topLeftHorPath = [UIBezierPath bezierPathWithRect:CGRectMake(rect.origin.x + offset, rect.origin.y + offset, pathHorizontalSize.width, pathHorizontalSize.height)];
     
-    UIBezierPath *topRightVerPath = [UIBezierPath bezierPathWithRect:CGRectMake(rect.origin.x + CGRectGetWidth(rect) - offset - angleLineWidth, rect.origin.y + offset, pathVerticalSize.width, pathVerticalSize.height)];
+    [anglePath applyTransform:CGAffineTransformMakeRotation(M_PI_2)];
+    self.bottomRightAngleLayer.path = anglePath.CGPath;
+    self.bottomRightAngleLayer.position = CGPointMake(rectOfInterest.origin.x + CGRectGetWidth(rectOfInterest) - offset, rectOfInterest.origin.y + CGRectGetHeight(rectOfInterest) - offset);
     
-    UIBezierPath *topRithtHorPath = [UIBezierPath bezierPathWithRect:CGRectMake(rect.origin.x + CGRectGetWidth(rect) - angleLineHeight - offset, rect.origin.y + offset, pathHorizontalSize.width, pathHorizontalSize.height)];
-    
-    UIBezierPath *bottomLeftVerPath = [UIBezierPath bezierPathWithRect:CGRectMake(rect.origin.x + offset, rect.origin.y + CGRectGetHeight(rect) - angleLineHeight - offset, pathVerticalSize.width, pathVerticalSize.height)];
-    
-    UIBezierPath *bottomLeftHorPath = [UIBezierPath bezierPathWithRect:CGRectMake(rect.origin.x + offset, rect.origin.y + CGRectGetHeight(rect) - offset - angleLineWidth, pathHorizontalSize.width, pathHorizontalSize.height)];
-    
-    UIBezierPath *bottomRithtVerPath = [UIBezierPath bezierPathWithRect:CGRectMake(rect.origin.x + CGRectGetWidth(rect) - offset - angleLineWidth, rect.origin.y +CGRectGetHeight(rect) - angleLineHeight - offset, pathVerticalSize.width, pathVerticalSize.height)];
-    
-    UIBezierPath *bottomRithtHorPath = [UIBezierPath bezierPathWithRect:CGRectMake(rect.origin.x + CGRectGetWidth(rect) - angleLineHeight - offset, rect.origin.y +CGRectGetHeight(rect) - offset - angleLineWidth, pathHorizontalSize.width, pathHorizontalSize.height)];
-    
-    [self addShapeLayerWithPath:topLeftVerPath fillColor:fillColor opacity:1.0];
-    [self addShapeLayerWithPath:topLeftHorPath fillColor:fillColor opacity:1.0];
-    [self addShapeLayerWithPath:topRightVerPath fillColor:fillColor opacity:1.0];
-    [self addShapeLayerWithPath:topRithtHorPath fillColor:fillColor opacity:1.0];
-    [self addShapeLayerWithPath:bottomLeftVerPath fillColor:fillColor opacity:1.0];
-    [self addShapeLayerWithPath:bottomLeftHorPath fillColor:fillColor opacity:1.0];
-    [self addShapeLayerWithPath:bottomRithtVerPath fillColor:fillColor opacity:1.0];
-    [self addShapeLayerWithPath:bottomRithtHorPath fillColor:fillColor opacity:1.0];
+    [anglePath applyTransform:CGAffineTransformMakeRotation(M_PI_2)];
+    self.bottomLeftAngleLayer.path = anglePath.CGPath;
+    self.bottomLeftAngleLayer.position = CGPointMake(rectOfInterest.origin.x + offset, rectOfInterest.origin.y + CGRectGetHeight(rectOfInterest) - offset );
 }
 
-- (void)addTipTextLayer
+- (void)configTipTextLayer
 {
     NSString *tipText = self.configuration.tipText;
-    if (!tipText) {
+    if (!tipText || tipText.length == 0) {
         return;
     }
+    CGRect rectOfInterest = self.scanCrop;
     CGSize textSize = [self calculateTitleSizeWithString:tipText];
+    self.tipTextLayer.bounds = CGRectMake(0, 0, textSize.width, textSize.height);
+    self.tipTextLayer.string = tipText;
     
-    CATextLayer *textLayer = [CATextLayer new];
-    textLayer.bounds = CGRectMake(0, 0, textSize.width, textSize.height);
-    textLayer.string = tipText;
-    textLayer.fontSize = 12;
-    textLayer.alignmentMode = kCAAlignmentCenter;
-    textLayer.truncationMode = kCATruncationEnd;
-    textLayer.foregroundColor = [UIColor whiteColor].CGColor;
-    textLayer.contentsScale = [[UIScreen mainScreen] scale];
-    
-    CGRect rect = self.scanCrop;
-    
-    textLayer.position = CGPointMake(rect.origin.x + CGRectGetWidth(rect) / 2, rect.origin.y + CGRectGetHeight(rect) + textSize.height);
-    
-    [self.layer addSublayer:textLayer];
+    self.tipTextLayer.position = CGPointMake(rectOfInterest.origin.x + CGRectGetWidth(rectOfInterest) / 2, rectOfInterest.origin.y + CGRectGetHeight(rectOfInterest) + textSize.height);
 }
 
 - (CGSize)calculateTitleSizeWithString:(NSString *)string
 {
-    NSDictionary *dic = @{NSFontAttributeName: [UIFont systemFontOfSize:12]};
+    if (!string || string.length == 0) {
+        return CGSizeZero;
+    }
+    NSDictionary *dic = @{NSFontAttributeName: [UIFont systemFontOfSize:13]};
     CGSize size = [string boundingRectWithSize:CGSizeMake(280, 0) options:NSStringDrawingTruncatesLastVisibleLine | NSStringDrawingUsesLineFragmentOrigin | NSStringDrawingUsesFontLeading attributes:dic context:nil].size;
     return CGSizeMake(ceilf(size.width)+2, size.height);
-}
-
-- (void)addShapeLayerWithPath:(UIBezierPath *)path fillColor:(UIColor *)color opacity:(float)opacity {
-    CAShapeLayer *shapeLayer = [[CAShapeLayer alloc] init];
-    shapeLayer.fillColor     = color.CGColor;
-    shapeLayer.opacity       = opacity;
-    shapeLayer.path          = path.CGPath;
-    [self.layer addSublayer:shapeLayer];
 }
 
 - (CGRect)getScanCropRect {
@@ -244,6 +249,14 @@
     CGFloat centerYOffset = self.configuration.scanCropCenterYOffset;
     CGRect scanCrop = CGRectOffset(innerRect, 0, centerYOffset);
     return scanCrop;
+}
+
+- (void)setConfiguration:(YFScanPreviewViewConfiguration *)configuration {
+    if (_configuration != configuration) {
+        _configuration = configuration ?: [YFScanPreviewViewConfiguration defaultConfiguration];
+
+        [self setNeedsLayout];
+    }
 }
 
 - (CGRect)getRectOfInterest
@@ -294,56 +307,5 @@
     
     return rectOfInterest;
 }
-
-//根据矩形区域，获取识别区域
-+ (CGRect)getScanRectInRect:(CGRect)previewRect configuration:(YFScanPreviewViewConfiguration*)configuration;
-{
-    CGFloat marginLeft = configuration.scanCropXMargin;
-    
-    CGRect innerRect = CGRectInset(previewRect, marginLeft, marginLeft);
-    CGFloat aspectRatio = configuration.scanCropAspectRatio;
-    
-    if (aspectRatio != 0) {
-        CGFloat width = CGRectGetWidth(innerRect);
-        CGFloat preHeight = CGRectGetHeight(innerRect);
-        CGFloat height = width / aspectRatio;
-        
-        innerRect.origin.y += (preHeight - height) / 2;
-        innerRect.size.height = height;
-    }
-    
-    CGFloat centerYOffset = configuration.scanCropCenterYOffset;
-    CGRect scanCrop = CGRectOffset(innerRect, 0, centerYOffset);
-    
-    //计算兴趣区域
-    CGRect rectOfInterest;
-
-    //ref:https://blog.cnbluebox.com/blog/2014/08/26/ioser-wei-ma-sao-miao/
-    CGSize size = previewRect.size;
-    CGFloat p1 = size.height/size.width;
-    CGFloat p2 = 1920./1080.;  //使用了1080p的图像输出
-    if (p1 < p2) {
-        CGFloat fixHeight = size.width * 1920. / 1080.;
-        CGFloat fixPadding = (fixHeight - size.height)/2;
-        rectOfInterest = CGRectMake((scanCrop.origin.y + fixPadding)/fixHeight,
-                                    scanCrop.origin.x/size.width,
-                                    scanCrop.size.height/fixHeight,
-                                    scanCrop.size.width/size.width);
-        
-        
-    } else {
-        CGFloat fixWidth = size.height * 1080. / 1920.;
-        CGFloat fixPadding = (fixWidth - size.width)/2;
-        rectOfInterest = CGRectMake(scanCrop.origin.y/size.height,
-                                    (scanCrop.origin.x + fixPadding)/fixWidth,
-                                    scanCrop.size.height/size.height,
-                                    scanCrop.size.width/fixWidth);
-        
-        
-    }
-    
-    return rectOfInterest;
-}
-
 
 @end
