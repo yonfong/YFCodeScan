@@ -71,12 +71,10 @@ static NSString * const kPodName = @"YFCodeScan";
 {
     [super viewDidLoad];
     self.view.backgroundColor = [UIColor blackColor];
+    self.preIdleTimerDisabled = [UIApplication sharedApplication].idleTimerDisabled;
+    self.preNavigationBarHidden = self.navigationController.navigationBarHidden;
+    self.preStatusBarStyle = [UIApplication sharedApplication].statusBarStyle;
     
-    YFScanPreviewView *previewView = self.preivewView;
-    if (!previewView) {
-        previewView = [[YFScanPreviewView alloc] initWithFrame:self.view.bounds];
-        self.preivewView = previewView;
-    }
     [self.view addSubview:self.preivewView];
     [self configTopBar];
     
@@ -86,9 +84,6 @@ static NSString * const kPodName = @"YFCodeScan";
         self.scanner.metadataObjectTypes = self.metadataObjectTypes;
     });
     
-    self.preIdleTimerDisabled = [UIApplication sharedApplication].idleTimerDisabled;
-    self.preNavigationBarHidden = self.navigationController.navigationBarHidden;
-    self.preStatusBarStyle = [UIApplication sharedApplication].statusBarStyle;
 }
 
 - (void)viewWillAppear:(BOOL)animated
@@ -252,32 +247,33 @@ static NSString * const kPodName = @"YFCodeScan";
 }
 
 - (void)checkCameraPemission {
-    if ([AVCaptureDevice respondsToSelector:@selector(authorizationStatusForMediaType:)]) {
-        AVAuthorizationStatus permission =
-        [AVCaptureDevice authorizationStatusForMediaType:AVMediaTypeVideo];
-        
-        switch (permission) {
-            case AVAuthorizationStatusAuthorized:
-                self.scanner.sessionSetupResult = YFSessionSetupResultSuccess;
-                break;
-
-            case AVAuthorizationStatusNotDetermined:
-            {
-                dispatch_suspend(self.scanner.sessionQueue);
-                [AVCaptureDevice requestAccessForMediaType:AVMediaTypeVideo
-                                         completionHandler:^(BOOL granted) {
-                                             if (!granted) {
-                                                 self.scanner.sessionSetupResult = YFSessionSetupResultNotAuthorized;
-                                             }
-                                             dispatch_resume(self.scanner.sessionQueue);
-                                         }];
-            }
-                break;
-                
-            default:
-                self.scanner.sessionSetupResult = YFSessionSetupResultNotAuthorized;
-                
+    AVAuthorizationStatus permission =
+    [AVCaptureDevice authorizationStatusForMediaType:AVMediaTypeVideo];
+    
+    switch (permission) {
+        case AVAuthorizationStatusAuthorized:
+            self.scanner.sessionSetupResult = YFSessionSetupResultSuccess;
+            break;
+            
+        case AVAuthorizationStatusNotDetermined:
+        {
+            dispatch_suspend(self.scanner.sessionQueue);
+            [AVCaptureDevice requestAccessForMediaType:AVMediaTypeVideo
+                                     completionHandler:^(BOOL granted) {
+                                         if (!granted) {
+                                             self.scanner.sessionSetupResult = YFSessionSetupResultNotAuthorized;
+                                         }
+                                         dispatch_resume(self.scanner.sessionQueue);
+                                     }];
         }
+            break;
+            
+        default:
+        {
+            self.scanner.sessionSetupResult = YFSessionSetupResultNotAuthorized;
+        }
+            break;
+            
     }
 }
 
