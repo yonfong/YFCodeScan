@@ -81,9 +81,7 @@ static NSString * const kPodName = @"YFCodeScan";
     [self checkCameraPemission];
     dispatch_async(self.scanner.sessionQueue, ^{
         [self.scanner setupCaptureSession];
-        self.scanner.metadataObjectTypes = self.metadataObjectTypes;
     });
-    
 }
 
 - (void)viewWillAppear:(BOOL)animated
@@ -98,6 +96,7 @@ static NSString * const kPodName = @"YFCodeScan";
         switch (weakSelf.scanner.sessionSetupResult) {
             case YFSessionSetupResultSuccess:
             {
+                weakSelf.scanner.metadataObjectTypes = self.metadataObjectTypes;
                 [weakSelf.scanner startScanning];
                 dispatch_async(dispatch_get_main_queue(), ^{
                     [weakSelf.preivewView startScanningAnimation];
