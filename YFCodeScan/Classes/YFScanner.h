@@ -9,17 +9,20 @@
 
 @import AVFoundation;
 
-typedef NS_ENUM(NSInteger,YFSessionSetupResult) {
-    YFSessionSetupResultNotAuthorized,
-    YFSessionSetupResultFailed,
-    YFSessionSetupResultSuccess
+typedef NS_ENUM(NSInteger,YFSessionSetupStatus) {
+    YFSessionSetupStatusIdle,
+    YFSessionSetupStatusDenied,
+    YFSessionSetupStatusFailed,
+    YFSessionSetupStatusFinished
 };
+
+NS_ASSUME_NONNULL_BEGIN
 
 @interface YFScanner : NSObject
 
 @property (nonatomic, strong, readonly) dispatch_queue_t _Nullable sessionQueue;
 
-@property (nonatomic, assign) YFSessionSetupResult sessionSetupResult;
+@property (nonatomic, assign) YFSessionSetupStatus setupStatus;
 
 @property (nonatomic, copy, null_resettable) NSArray<NSString *> *metadataObjectTypes;
 
@@ -37,6 +40,8 @@ typedef NS_ENUM(NSInteger,YFSessionSetupResult) {
 
 - (void)setTorchMode:(AVCaptureTorchMode)torchMode;
 
-- (AVCaptureVideoPreviewLayer *_Nullable)previewLayer;
+- (AVCaptureVideoPreviewLayer *)previewLayer;
 
 @end
+
+NS_ASSUME_NONNULL_END

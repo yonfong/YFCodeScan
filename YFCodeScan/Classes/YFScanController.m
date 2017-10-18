@@ -82,6 +82,11 @@ static NSString * const kPodName = @"YFCodeScan";
     dispatch_async(self.scanner.sessionQueue, ^{
         [self.scanner setupCaptureSession];
     });
+    
+    AVCaptureVideoPreviewLayer *previewLayer = [self.scanner previewLayer];
+    previewLayer.frame = self.preivewView.layer.bounds;
+    previewLayer.videoGravity = AVLayerVideoGravityResizeAspectFill;
+    [self.preivewView.layer insertSublayer:previewLayer atIndex:0];
 }
 
 - (void)viewWillAppear:(BOOL)animated
@@ -90,26 +95,17 @@ static NSString * const kPodName = @"YFCodeScan";
     [UIApplication sharedApplication].idleTimerDisabled = YES;
     self.navigationController.navigationBarHidden = YES;
     [UIApplication sharedApplication].statusBarStyle = UIStatusBarStyleLightContent;
-    
+
     __weak __typeof(self) weakSelf = self;
     dispatch_async(self.scanner.sessionQueue, ^{
-        switch (weakSelf.scanner.sessionSetupResult) {
-            case YFSessionSetupResultSuccess:
+        switch (weakSelf.scanner.setupStatus) {
+            case YFSessionSetupStatusFinished:
             {
-                weakSelf.scanner.metadataObjectTypes = self.metadataObjectTypes;
                 [weakSelf.scanner startScanning];
-                dispatch_async(dispatch_get_main_queue(), ^{
-                    [weakSelf.preivewView startScanningAnimation];
-                    AVCaptureVideoPreviewLayer *previewLayer = [self.scanner previewLayer];
-                    if (previewLayer && ![self.preivewView.layer.sublayers containsObject:previewLayer]) {
-                        previewLayer.frame = self.preivewView.layer.bounds;
-                        previewLayer.videoGravity = AVLayerVideoGravityResizeAspectFill;
-                        [weakSelf.preivewView.layer insertSublayer:previewLayer atIndex:0];
-                    }
-                });
+                weakSelf.scanner.metadataObjectTypes = self.metadataObjectTypes;
             }
                 break;
-            case YFSessionSetupResultFailed:
+            case YFSessionSetupStatusFailed:
             {
                 dispatch_async(dispatch_get_main_queue(), ^{
                     UIAlertController *alertCtl = [UIAlertController alertControllerWithTitle:@"无法捕获图像" message:@"" preferredStyle:UIAlertControllerStyleAlert];
@@ -121,7 +117,7 @@ static NSString * const kPodName = @"YFCodeScan";
             }
                 break;
                 
-            case YFSessionSetupResultNotAuthorized:
+            case YFSessionSetupStatusDenied:
             {
                 dispatch_async(dispatch_get_main_queue(), ^{
                     NSDictionary *infoDictionary = [[NSBundle mainBundle] infoDictionary];
@@ -156,6 +152,16 @@ static NSString * const kPodName = @"YFCodeScan";
     [UIApplication sharedApplication].idleTimerDisabled = self.preIdleTimerDisabled;
     self.navigationController.navigationBarHidden = self.preNavigationBarHidden;
     [UIApplication sharedApplication].statusBarStyle = self.preStatusBarStyle;
+}
+
+- (void)viewDidAppear:(BOOL)animated
+{
+    [super viewDidAppear:animated];
+    if (self.scanner.setupStatus == YFSessionSetupStatusFinished) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [self.preivewView startScanningAnimation];
+        });
+    }
 }
 
 - (void)configTopBar {
@@ -251,7 +257,7 @@ static NSString * const kPodName = @"YFCodeScan";
     
     switch (permission) {
         case AVAuthorizationStatusAuthorized:
-            self.scanner.sessionSetupResult = YFSessionSetupResultSuccess;
+            self.scanner.setupStatus = YFSessionSetupStatusIdle;
             break;
             
         case AVAuthorizationStatusNotDetermined:
@@ -260,7 +266,7 @@ static NSString * const kPodName = @"YFCodeScan";
             [AVCaptureDevice requestAccessForMediaType:AVMediaTypeVideo
                                      completionHandler:^(BOOL granted) {
                                          if (!granted) {
-                                             self.scanner.sessionSetupResult = YFSessionSetupResultNotAuthorized;
+                                             self.scanner.setupStatus = YFSessionSetupStatusDenied;
                                          }
                                          dispatch_resume(self.scanner.sessionQueue);
                                      }];
@@ -269,7 +275,7 @@ static NSString * const kPodName = @"YFCodeScan";
             
         default:
         {
-            self.scanner.sessionSetupResult = YFSessionSetupResultNotAuthorized;
+            self.scanner.setupStatus = YFSessionSetupStatusDenied;
         }
             break;
             
@@ -288,6 +294,8 @@ static NSString * const kPodName = @"YFCodeScan";
     } else {
         _metadataObjectTypes = [self defaultMetaDataObjectTypes];
     }
+    
+    self.scanner.metadataObjectTypes = _metadataObjectTypes;
 }
 
 -(NSArray<NSString *> *)metadataObjectTypes

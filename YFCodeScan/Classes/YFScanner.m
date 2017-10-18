@@ -34,7 +34,7 @@
         _metadataObjectsQueue = dispatch_queue_create( "com.bluesky.scanner.metadataObjects", DISPATCH_QUEUE_SERIAL );
         _captureSession = [[AVCaptureSession alloc] init];
         _metadataOutput = [[AVCaptureMetadataOutput alloc] init];
-        _sessionSetupResult = YFSessionSetupResultSuccess;
+        _setupStatus = YFSessionSetupStatusIdle;
     }
     return self;
 }
@@ -60,7 +60,7 @@
     [self.captureDeviceInput.device unlockForConfiguration];
 }
 
-- (AVCaptureVideoPreviewLayer *_Nullable)previewLayer
+- (AVCaptureVideoPreviewLayer *)previewLayer
 {
     if(!_previewLayer && _captureSession){
         _previewLayer = [AVCaptureVideoPreviewLayer layerWithSession:_captureSession];
@@ -71,26 +71,26 @@
 #pragma mark - Capture Session Setup
 - (void)setupCaptureSession
 {
-    if (self.sessionSetupResult != YFSessionSetupResultSuccess) {
+    if (self.setupStatus == YFSessionSetupStatusFinished || self.setupStatus != YFSessionSetupStatusIdle) {
         return ;
     }
     
     [self.captureSession beginConfiguration];
     if(![self addDefaultCameraInputToCaptureSession:self.captureSession]){
         NSLog(@"failed to add camera input to capture session");
-        self.sessionSetupResult = YFSessionSetupResultFailed;
+        self.setupStatus = YFSessionSetupStatusFailed;
         [self.captureSession commitConfiguration];
         return;
     }
     
     if (![self addMetadataOutputToCaptureSession:self.captureSession]) {
         NSLog(@"failed to add metadata output to capture session");
-        self.sessionSetupResult = YFSessionSetupResultFailed;
+        self.setupStatus = YFSessionSetupStatusFailed;
         [self.captureSession commitConfiguration];
         return;
     }
     
-    self.sessionSetupResult = YFSessionSetupResultSuccess;
+    self.setupStatus = YFSessionSetupStatusFinished;
     [self.captureSession commitConfiguration];
 }
 
@@ -186,6 +186,9 @@
         _metadataObjectTypes = [self defaultMetaDataObjectTypes];
     }
     
+    if (self.setupStatus != YFSessionSetupStatusFinished) {
+        return;
+    }
     dispatch_async(self.sessionQueue, ^{
         self.metadataOutput.metadataObjectTypes = _metadataObjectTypes;
     });
