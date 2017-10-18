@@ -21,7 +21,7 @@ typedef NS_ENUM(NSInteger,YFSessionSetupResult) {
 
 @property (nonatomic, assign) YFSessionSetupResult sessionSetupResult;
 
-@property (nonatomic, copy, null_resettable) NSArray<AVMetadataObjectType> *metadataObjectTypes;
+@property (nonatomic, copy, null_resettable) NSArray<NSString *> *metadataObjectTypes;
 
 @property (nonatomic,copy)void (^ _Nullable scanSuccessResult)(NSString * _Nullable scannedResult);
 

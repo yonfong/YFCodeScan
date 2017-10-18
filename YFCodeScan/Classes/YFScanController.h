@@ -27,7 +27,7 @@ typedef NS_ENUM(NSInteger,YFScanCodeType) {
 
 @property (nonatomic, assign) YFScanCodeType scanCodeType;
 
-@property (nonatomic, copy) NSArray<AVMetadataObjectType> *metadataObjectTypes;
+@property (nonatomic, copy) NSArray<NSString *> *metadataObjectTypes;
 
 @property (nonatomic, copy) NSString *topBarTitle;
 

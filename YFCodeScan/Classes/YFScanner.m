@@ -174,7 +174,7 @@
 }
 
 #pragma mark - getters and setters
-- (void)setMetadataObjectTypes:(NSArray<AVMetadataObjectType> *)metadataObjectTypes
+- (void)setMetadataObjectTypes:(NSArray<NSString *> *)metadataObjectTypes
 {
     if (_metadataObjectTypes == metadataObjectTypes) {
         return;
@@ -191,7 +191,7 @@
     });
 }
 
--(NSArray<AVMetadataObjectType> *)metadataObjectTypes
+-(NSArray<NSString *> *)metadataObjectTypes
 {
     if (!_metadataObjectTypes) {
         _metadataObjectTypes = [self defaultMetaDataObjectTypes];

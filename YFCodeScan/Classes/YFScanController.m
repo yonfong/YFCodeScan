@@ -282,7 +282,7 @@ static NSString * const kPodName = @"YFCodeScan";
 }
 
 #pragma mark - getters && setters
-- (void)setMetadataObjectTypes:(NSArray<AVMetadataObjectType> *)metadataObjectTypes
+- (void)setMetadataObjectTypes:(NSArray<NSString *> *)metadataObjectTypes
 {
     if (_metadataObjectTypes == metadataObjectTypes) {
         return;
@@ -295,7 +295,7 @@ static NSString * const kPodName = @"YFCodeScan";
     }
 }
 
--(NSArray<AVMetadataObjectType> *)metadataObjectTypes
+-(NSArray<NSString *> *)metadataObjectTypes
 {
     if (!_metadataObjectTypes) {
         _metadataObjectTypes = [self defaultMetaDataObjectTypes];
@@ -329,7 +329,7 @@ static NSString * const kPodName = @"YFCodeScan";
     }
 }
 
-- (NSArray *)defaultMetaDataObjectTypes
+- (NSArray<NSString *> *)defaultMetaDataObjectTypes
 {
     NSArray *qrCodeTypes = @[AVMetadataObjectTypeQRCode];
     NSArray *barCodeTypes = @[AVMetadataObjectTypeEAN13Code,AVMetadataObjectTypeEAN8Code,AVMetadataObjectTypeCode128Code];
