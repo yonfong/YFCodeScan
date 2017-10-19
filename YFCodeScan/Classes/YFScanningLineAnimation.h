@@ -21,7 +21,7 @@ typedef NS_ENUM(NSInteger, YFLineAnimationType) {
 
 @property (nonatomic, strong) CAMediaTimingFunction *timingFunction;
 
-@property (nonatomic, assign) CFTimeInterval duration;
+@property (nonatomic, assign) CGFloat speed;
 
 + (instancetype)defaultScanningLineAnimation;
 

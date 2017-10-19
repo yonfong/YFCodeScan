@@ -20,7 +20,7 @@ static NSString * const kScanPostionKeyframeValueAnimation = @"kScanPostionKeyfr
     if (self = [super init]) {
         _lineAnimationType = YFLineAnimationTypeUpToDown;
         _timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut];
-        _duration = 4.0;
+        _speed = 1;
     }
     return self;
 }
@@ -56,7 +56,8 @@ static NSString * const kScanPostionKeyframeValueAnimation = @"kScanPostionKeyfr
 
 - (CAKeyframeAnimation *)animationForLineRect:(CGRect)lineRect limitRect:(CGRect)limitRect {
     CAKeyframeAnimation *animation = [CAKeyframeAnimation animationWithKeyPath:@"position"];
-    animation.duration = _duration > 0 ? : 4.0;
+    animation.duration = 1;
+    animation.speed = _speed;
     animation.repeatCount = HUGE_VALF;
     animation.removedOnCompletion = NO;
     animation.fillMode = kCAFillModeForwards;
