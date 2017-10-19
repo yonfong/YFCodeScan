@@ -79,6 +79,8 @@ static NSString * const kPodName = @"YFCodeScan";
     [self configTopBar];
     
     [self checkCameraPemission];
+    
+    self.scanner.metadataObjectTypes = self.metadataObjectTypes;
     dispatch_async(self.scanner.sessionQueue, ^{
         [self.scanner setupCaptureSession];
     });
@@ -102,7 +104,6 @@ static NSString * const kPodName = @"YFCodeScan";
             case YFSessionSetupStatusFinished:
             {
                 [weakSelf.scanner startScanning];
-                weakSelf.scanner.metadataObjectTypes = self.metadataObjectTypes;
             }
                 break;
             case YFSessionSetupStatusFailed:
