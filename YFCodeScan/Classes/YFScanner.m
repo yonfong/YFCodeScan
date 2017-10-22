@@ -330,7 +330,9 @@ NS_INLINE void dispatch_main_async(dispatch_block_t block) {
     float brightnessValue = [[exifMetadata objectForKey:(NSString *)kCGImagePropertyExifBrightnessValue] floatValue];
     
     if ([self.delegate respondsToSelector:@selector(scannerDidCaptureBrightnessSensitive:withBrightness:)]) {
-        [self.delegate scannerDidCaptureBrightnessSensitive:self withBrightness:brightnessValue];
+        dispatch_main_async(^{
+            [self.delegate scannerDidCaptureBrightnessSensitive:self withBrightness:brightnessValue];
+        });
     }
 }
 

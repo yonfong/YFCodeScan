@@ -32,6 +32,9 @@ NS_INLINE void dispatch_main_async(dispatch_block_t block) {
 
 @property (nonatomic, weak) UIView *topBarTitleView;
 
+@property (nonatomic, strong) UIButton *flashButton;
+@property (nonatomic, strong) UILabel *flashTipLabel;
+
 @end
 
 @implementation YFScanController
@@ -259,6 +262,47 @@ NS_INLINE void dispatch_main_async(dispatch_block_t block) {
     return UIStatusBarStyleLightContent;
 }
 
+- (void)showFlashLight:(BOOL)weakLight
+{
+    if (!(self.scanner.status == YFSessionStatusRunning || self.scanner.status == YFSessionStatusStop)) {
+        return;
+    }
+    
+    if (self.flashButton.selected) {
+        return;
+    }
+    
+    if (!self.flashButton.hidden && weakLight) {
+        return;
+    }
+    
+    if (self.flashButton.hidden && !weakLight) {
+        return;
+    }
+    
+    if (weakLight) {
+        self.flashButton.hidden = NO;
+        self.flashTipLabel.text = @"轻触照亮";
+        self.flashTipLabel.hidden = NO;
+    } else {
+        self.flashButton.hidden = YES;
+        self.flashTipLabel.text = @"轻触照亮";
+        self.flashTipLabel.hidden = YES;
+    }
+}
+
+- (void)flashClicked:(UIButton *)sender
+{
+    sender.selected = !sender.selected;
+    AVCaptureTorchMode trochMode = sender.selected ? AVCaptureTorchModeOn : AVCaptureTorchModeOff;
+    [self.scanner setTorchMode:trochMode];
+    if (sender.selected) {
+        self.flashTipLabel.text = @"轻触关闭";
+    } else {
+        self.flashTipLabel.text = @"轻触照亮";
+    }
+}
+
 #pragma mark - YFScannerDelegate
 
 - (void)scannerWillStartSetup:(YFScanner *_Nonnull)scanner
@@ -287,7 +331,8 @@ NS_INLINE void dispatch_main_async(dispatch_block_t block) {
 
 - (void)scannerDidCaptureBrightnessSensitive:(YFScanner *_Nonnull)scanner withBrightness:(CGFloat)brightness
 {
-    NSLog(@"%s , brightess>>> %f",__FUNCTION__, brightness);
+    BOOL weakLight = brightness < 0;
+    [self showFlashLight:weakLight];
 }
 
 #pragma mark - getters && setters
@@ -338,6 +383,57 @@ NS_INLINE void dispatch_main_async(dispatch_block_t block) {
         
         self.metadataObjectTypes = [self defaultMetaDataObjectTypes];
     }
+}
+
+- (UIButton *)flashButton
+{
+    if (!_flashButton) {
+        NSBundle *bundle = [NSBundle bundleForClass:[self class]];
+        NSURL *bundleURL = [bundle URLForResource:kPodName withExtension:@"bundle"];
+        bundle = [NSBundle bundleWithURL:bundleURL];
+        
+        UIImage *normalImage = [UIImage imageNamed:@"yf_flashlight_normal" inBundle:bundle compatibleWithTraitCollection:nil];
+        UIImage *highlightedImage = [UIImage imageNamed:@"yf_flashlight_highlighted" inBundle:bundle compatibleWithTraitCollection:nil];
+        
+        _flashButton = [UIButton buttonWithType:UIButtonTypeCustom];
+        [_flashButton setImage:normalImage forState:UIControlStateNormal];
+        [_flashButton setImage:highlightedImage forState:UIControlStateSelected];
+        _flashButton.hidden = YES;
+        [_flashButton addTarget:self action:@selector(flashClicked:) forControlEvents:UIControlEventTouchUpInside];
+        [self.view addSubview:_flashButton];
+        
+        CGRect scanCropRect = [self.preivewView getScanCropRect];
+        
+        CGFloat bottomYPositionOffset = CGRectGetHeight(self.view.bounds) - scanCropRect.origin.y - CGRectGetHeight(scanCropRect);
+        
+        _flashButton.translatesAutoresizingMaskIntoConstraints = NO;
+        [self.view addConstraint:[NSLayoutConstraint constraintWithItem:_flashButton attribute:NSLayoutAttributeBottom relatedBy:NSLayoutRelationEqual toItem:self.view attribute:NSLayoutAttributeBottom multiplier:1 constant: -bottomYPositionOffset - 20 - 20]];
+        
+        [self.view addConstraint:[NSLayoutConstraint constraintWithItem:_flashButton attribute:NSLayoutAttributeCenterX relatedBy:NSLayoutRelationEqual toItem:self.view attribute:NSLayoutAttributeCenterX multiplier:1 constant: 0]];
+    }
+    return _flashButton;
+}
+
+- (UILabel *)flashTipLabel
+{
+    if (!_flashTipLabel) {
+        _flashTipLabel = [[UILabel alloc] initWithFrame:CGRectZero];
+        _flashTipLabel.textColor = [UIColor whiteColor];
+        _flashTipLabel.font = [UIFont systemFontOfSize:12];
+        _flashTipLabel.hidden = YES;
+        _flashTipLabel.text = @"轻触照亮";
+        [self.view addSubview:_flashTipLabel];
+        
+        CGRect scanCropRect = [self.preivewView getScanCropRect];
+        
+        CGFloat bottomYPositionOffset = CGRectGetHeight(self.view.bounds) - scanCropRect.origin.y - CGRectGetHeight(scanCropRect);
+        
+        _flashTipLabel.translatesAutoresizingMaskIntoConstraints = NO;
+        [self.view addConstraint:[NSLayoutConstraint constraintWithItem:_flashTipLabel attribute:NSLayoutAttributeBottom relatedBy:NSLayoutRelationEqual toItem:self.view attribute:NSLayoutAttributeBottom multiplier:1 constant: -bottomYPositionOffset - 20]];
+        
+        [self.view addConstraint:[NSLayoutConstraint constraintWithItem:_flashTipLabel attribute:NSLayoutAttributeCenterX relatedBy:NSLayoutRelationEqual toItem:self.view attribute:NSLayoutAttributeCenterX multiplier:1 constant: 0]];
+    }
+    return _flashTipLabel;
 }
 
 - (NSArray<NSString *> *)defaultMetaDataObjectTypes
