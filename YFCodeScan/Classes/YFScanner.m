@@ -7,6 +7,15 @@
 
 #import "YFScanner.h"
 
+// 主线程执行
+NS_INLINE void dispatch_main_async(dispatch_block_t block) {
+    if ([NSThread isMainThread]) {
+        block();
+    } else {
+        dispatch_async(dispatch_get_main_queue(), block);
+    }
+}
+
 @interface YFScanner()<AVCaptureMetadataOutputObjectsDelegate>
 
 @property (nonatomic, strong, readwrite) dispatch_queue_t sessionQueue;
@@ -36,8 +45,11 @@
 {
     if(self = [super init]){
         [self commonInit];
-        [self setup];
         _scanSuccessResult = success;
+        
+        [self checkCameraPemission];
+        
+        [self startSetupCaptureSession];
     }
     return self;
 }
@@ -60,6 +72,11 @@
     dispatch_async(_sessionQueue, ^{
         [_captureSession startRunning];
         _status = YFSessionStatusRunning;
+        if ([self.delegate respondsToSelector:@selector(scannerDidSessionStatusChanged:)]) {
+            dispatch_main_async(^{
+                [self.delegate scannerDidSessionStatusChanged:self];
+            });
+        }
     });
 }
 
@@ -72,6 +89,11 @@
     dispatch_async(_sessionQueue, ^{
         [_captureSession stopRunning];
         _status = YFSessionStatusStop;
+        if ([self.delegate respondsToSelector:@selector(scannerDidSessionStatusChanged:)]) {
+            dispatch_main_async(^{
+                [self.delegate scannerDidSessionStatusChanged:self];
+            });
+        }
     });
 }
 
@@ -96,10 +118,11 @@
 
 #pragma mark - Capture Session Setup
 
-- (void)setup
+- (void)startSetupCaptureSession
 {
-    [self checkCameraPemission];
-    
+    if ([self.delegate respondsToSelector:@selector(scannerWillStartSetup:)]) {
+        [self.delegate scannerWillStartSetup:self];
+    }
     dispatch_async(_sessionQueue, ^{
         [self setupCaptureSession];
     });
@@ -120,6 +143,9 @@
                                      completionHandler:^(BOOL granted) {
                                          if (!granted) {
                                              _status = YFSessionStatusPemissionDenied;
+                                             if ([self.delegate respondsToSelector:@selector(scannerDidSessionStatusChanged:)]) {
+                                                 [self.delegate scannerDidSessionStatusChanged:self];
+                                             }
                                          }
                                          dispatch_resume(_sessionQueue);
                                      }];
@@ -129,6 +155,9 @@
         default:
         {
             _status = YFSessionStatusPemissionDenied;
+            if ([self.delegate respondsToSelector:@selector(scannerDidSessionStatusChanged:)]) {
+                [self.delegate scannerDidSessionStatusChanged:self];
+            }
         }
             break;
             
@@ -147,18 +176,45 @@
         NSLog(@"failed to add camera input to capture session");
         _status = YFSessionStatusSetupFailed;
         [_captureSession commitConfiguration];
+        
+        if ([self.delegate respondsToSelector:@selector(scannerDidSessionStatusChanged:)]) {
+            dispatch_main_async(^{
+                [self.delegate scannerDidSessionStatusChanged:self];
+            });
+        }
         return;
+    } else {
+        if ([self.delegate respondsToSelector:@selector(scannerDidAddDeviceInputSucceed:)]) {
+            dispatch_main_async(^{
+                [self.delegate scannerDidAddDeviceInputSucceed:self];
+            });
+        }
     }
     
     if (![self addMetadataOutputToCaptureSession:_captureSession]) {
         NSLog(@"failed to add metadata output to capture session");
         _status = YFSessionStatusSetupFailed;
         [_captureSession commitConfiguration];
+        if ([self.delegate respondsToSelector:@selector(scannerDidSessionStatusChanged:)]) {
+            dispatch_main_async(^{
+                [self.delegate scannerDidSessionStatusChanged:self];
+            });
+        }
         return;
+    } else {
+        if ([self.delegate respondsToSelector:@selector(scannerDidAddMetadataOutputSucceed:)]) {
+            [self.delegate scannerDidAddMetadataOutputSucceed:self];
+        }
     }
-    
+        
     _status = YFSessionStatusSetupSucceed;
     [_captureSession commitConfiguration];
+    
+    if ([self.delegate respondsToSelector:@selector(scannerDidSessionStatusChanged:)]) {
+        dispatch_main_async(^{
+            [self.delegate scannerDidSessionStatusChanged:self];
+        });
+    }
 }
 
 - (BOOL)addDefaultCameraInputToCaptureSession:(AVCaptureSession *)captureSession
@@ -255,9 +311,10 @@
         _metadataObjectTypes = [self defaultMetaDataObjectTypes];
     }
     
-    if (_status != YFSessionStatusSetupSucceed) {
+    if (_status == YFSessionStatusUnSetup || _status == YFSessionStatusSetupFailed || _status == YFSessionStatusPemissionDenied) {
         return;
     }
+    
     dispatch_async(_sessionQueue, ^{
         _metadataOutput.metadataObjectTypes = _metadataObjectTypes;
     });

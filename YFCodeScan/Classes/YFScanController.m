@@ -18,7 +18,7 @@ NS_INLINE void dispatch_main_async(dispatch_block_t block) {
     }
 }
 
-@interface YFScanController ()
+@interface YFScanController ()<YFScannerDelegate>
 
 @property (nonatomic, strong, readwrite)YFScanner *scanner;
 
@@ -38,6 +38,7 @@ NS_INLINE void dispatch_main_async(dispatch_block_t block) {
 
 @synthesize metadataObjectTypes = _metadataObjectTypes;
 
+#pragma mark - initial
 - (instancetype)init
 {
     if (self = [super init]) {
@@ -81,6 +82,7 @@ NS_INLINE void dispatch_main_async(dispatch_block_t block) {
     self.view.backgroundColor = [UIColor blackColor];
     
     _scanner = [[YFScanner alloc] init];
+    _scanner.delegate = self;
     
     self.preIdleTimerDisabled = [UIApplication sharedApplication].idleTimerDisabled;
     self.preNavigationBarHidden = self.navigationController.navigationBarHidden;
@@ -168,6 +170,8 @@ NS_INLINE void dispatch_main_async(dispatch_block_t block) {
     }
 }
 
+#pragma mark - config
+
 - (void)configTopBar {
     [self.view addSubview:self.topBarView];
     self.topBarView.translatesAutoresizingMaskIntoConstraints = NO;
@@ -253,6 +257,32 @@ NS_INLINE void dispatch_main_async(dispatch_block_t block) {
 - (UIStatusBarStyle)preferredStatusBarStyle
 {
     return UIStatusBarStyleLightContent;
+}
+
+#pragma mark - YFScannerDelegate
+
+- (void)scannerWillStartSetup:(YFScanner *_Nonnull)scanner
+{
+    NSLog(@"%s",__FUNCTION__);
+}
+
+- (void)scannerDidAddDeviceInputSucceed:(YFScanner *_Nonnull)scanner
+{
+    NSLog(@"%s",__FUNCTION__);
+}
+
+- (void)scannerDidAddMetadataOutputSucceed:(YFScanner *_Nonnull)scanner
+{
+    NSLog(@"%s",__FUNCTION__);
+    scanner.metadataObjectTypes = self.metadataObjectTypes;
+}
+
+- (void)scannerDidSessionStatusChanged:(YFScanner *_Nonnull)scanner
+{
+    NSLog(@"%s",__FUNCTION__);
+    if (scanner.status == YFSessionStatusSetupSucceed) {
+        [scanner startScanning];
+    }
 }
 
 #pragma mark - getters && setters
