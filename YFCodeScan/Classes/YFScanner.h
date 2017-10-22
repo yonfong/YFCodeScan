@@ -9,20 +9,20 @@
 
 @import AVFoundation;
 
-typedef NS_ENUM(NSInteger,YFSessionSetupStatus) {
-    YFSessionSetupStatusIdle,
-    YFSessionSetupStatusDenied,
-    YFSessionSetupStatusFailed,
-    YFSessionSetupStatusFinished
+typedef NS_ENUM(NSInteger,YFSessionStatus) {
+    YFSessionStatusUnSetup,
+    YFSessionStatusPemissionDenied,
+    YFSessionStatusSetupFailed,
+    YFSessionStatusSetupSucceed,
+    YFSessionStatusRunning,
+    YFSessionStatusStop
 };
 
 NS_ASSUME_NONNULL_BEGIN
 
 @interface YFScanner : NSObject
 
-@property (nonatomic, strong, readonly) dispatch_queue_t _Nullable sessionQueue;
-
-@property (nonatomic, assign) YFSessionSetupStatus setupStatus;
+@property (nonatomic, assign, readonly) YFSessionStatus status;
 
 @property (nonatomic, copy, null_resettable) NSArray<NSString *> *metadataObjectTypes;
 
@@ -31,8 +31,6 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, assign) CGRect rectOfInterest;
 
 - (instancetype _Nullable )initWithScanSuccess:(void(^_Nullable)(NSString * _Nonnull scannedResult))success;
-
-- (void)setupCaptureSession;
 
 - (void)startScanning;
 

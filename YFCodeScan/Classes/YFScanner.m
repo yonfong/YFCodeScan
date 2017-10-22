@@ -22,42 +22,68 @@
 
 @synthesize metadataObjectTypes = _metadataObjectTypes;
 
+- (void)dealloc
+{
+    NSLog(@"%s",__FUNCTION__);
+}
+
 - (instancetype)init
 {
     return [self initWithScanSuccess:nil];
 }
 
-- (instancetype)initWithScanSuccess:(void (^)(NSString * _Nonnull))success {
+- (instancetype)initWithScanSuccess:(void (^)(NSString * _Nonnull))success
+{
     if(self = [super init]){
-        self.scanSuccessResult = success;
-        _sessionQueue = dispatch_queue_create( "com.bluesky.scanner.session", DISPATCH_QUEUE_SERIAL );
-        _metadataObjectsQueue = dispatch_queue_create( "com.bluesky.scanner.metadataObjects", DISPATCH_QUEUE_SERIAL );
-        _captureSession = [[AVCaptureSession alloc] init];
-        _metadataOutput = [[AVCaptureMetadataOutput alloc] init];
-        _setupStatus = YFSessionSetupStatusIdle;
+        [self commonInit];
+        [self setup];
+        _scanSuccessResult = success;
     }
     return self;
 }
 
+- (void)commonInit
+{
+    _sessionQueue = dispatch_queue_create( "com.bluesky.scanner.session", DISPATCH_QUEUE_SERIAL );
+    _metadataObjectsQueue = dispatch_queue_create( "com.bluesky.scanner.metadataObjects", DISPATCH_QUEUE_SERIAL );
+    _captureSession = [[AVCaptureSession alloc] init];
+    _metadataOutput = [[AVCaptureMetadataOutput alloc] init];
+    _status = YFSessionStatusUnSetup;
+}
+
+
 - (void)startScanning
 {
-    [_captureSession startRunning];
+    if (_status == YFSessionStatusRunning) {
+        return;
+    }
+    dispatch_async(_sessionQueue, ^{
+        [_captureSession startRunning];
+        _status = YFSessionStatusRunning;
+    });
 }
 
 - (void)stopScanning
 {
-    [_captureSession stopRunning];
+    if (_status == YFSessionStatusStop) {
+        return;
+    }
+    
+    dispatch_async(_sessionQueue, ^{
+        [_captureSession stopRunning];
+        _status = YFSessionStatusStop;
+    });
 }
 
 - (void)setTorchMode:(AVCaptureTorchMode)torchMode
 {
-    if (![self.captureDeviceInput.device isTorchModeSupported:torchMode]) {
+    if (![_captureDeviceInput.device isTorchModeSupported:torchMode]) {
         return;
     }
     
-    [self.captureDeviceInput.device lockForConfiguration:nil];
-    self.captureDeviceInput.device.torchMode = torchMode;
-    [self.captureDeviceInput.device unlockForConfiguration];
+    [_captureDeviceInput.device lockForConfiguration:nil];
+    _captureDeviceInput.device.torchMode = torchMode;
+    [_captureDeviceInput.device unlockForConfiguration];
 }
 
 - (AVCaptureVideoPreviewLayer *)previewLayer
@@ -69,29 +95,70 @@
 }
 
 #pragma mark - Capture Session Setup
+
+- (void)setup
+{
+    [self checkCameraPemission];
+    
+    dispatch_async(_sessionQueue, ^{
+        [self setupCaptureSession];
+    });
+}
+
+- (void)checkCameraPemission {
+    AVAuthorizationStatus permission =
+    [AVCaptureDevice authorizationStatusForMediaType:AVMediaTypeVideo];
+    
+    switch (permission) {
+        case AVAuthorizationStatusAuthorized:
+            break;
+            
+        case AVAuthorizationStatusNotDetermined:
+        {
+            dispatch_suspend(_sessionQueue);
+            [AVCaptureDevice requestAccessForMediaType:AVMediaTypeVideo
+                                     completionHandler:^(BOOL granted) {
+                                         if (!granted) {
+                                             _status = YFSessionStatusPemissionDenied;
+                                         }
+                                         dispatch_resume(_sessionQueue);
+                                     }];
+        }
+            break;
+            
+        default:
+        {
+            _status = YFSessionStatusPemissionDenied;
+        }
+            break;
+            
+    }
+}
+
+
 - (void)setupCaptureSession
 {
-    if (self.setupStatus == YFSessionSetupStatusFinished || self.setupStatus != YFSessionSetupStatusIdle) {
+    if (_status == YFSessionStatusSetupSucceed || _status != YFSessionStatusUnSetup) {
         return ;
     }
     
-    [self.captureSession beginConfiguration];
-    if(![self addDefaultCameraInputToCaptureSession:self.captureSession]){
+    [_captureSession beginConfiguration];
+    if(![self addDefaultCameraInputToCaptureSession:_captureSession]){
         NSLog(@"failed to add camera input to capture session");
-        self.setupStatus = YFSessionSetupStatusFailed;
-        [self.captureSession commitConfiguration];
+        _status = YFSessionStatusSetupFailed;
+        [_captureSession commitConfiguration];
         return;
     }
     
-    if (![self addMetadataOutputToCaptureSession:self.captureSession]) {
+    if (![self addMetadataOutputToCaptureSession:_captureSession]) {
         NSLog(@"failed to add metadata output to capture session");
-        self.setupStatus = YFSessionSetupStatusFailed;
-        [self.captureSession commitConfiguration];
+        _status = YFSessionStatusSetupFailed;
+        [_captureSession commitConfiguration];
         return;
     }
     
-    self.setupStatus = YFSessionSetupStatusFinished;
-    [self.captureSession commitConfiguration];
+    _status = YFSessionStatusSetupSucceed;
+    [_captureSession commitConfiguration];
 }
 
 - (BOOL)addDefaultCameraInputToCaptureSession:(AVCaptureSession *)captureSession
@@ -118,10 +185,10 @@
 
 - (BOOL)addMetadataOutputToCaptureSession:(AVCaptureSession *)captureSession {
     
-    BOOL success = [self addOutput:self.metadataOutput toCaptureSession:captureSession];
+    BOOL success = [self addOutput:_metadataOutput toCaptureSession:captureSession];
     if (success) {
-        [self.metadataOutput setMetadataObjectsDelegate:self queue:self.metadataObjectsQueue];
-        self.metadataObjectTypes = self.metadataObjectTypes;
+        [_metadataOutput setMetadataObjectsDelegate:self queue:_metadataObjectsQueue];
+        _metadataOutput.metadataObjectTypes = _metadataOutput.availableMetadataObjectTypes;
     }
     
     return success;
@@ -149,6 +216,8 @@
     }
     return NO;
 }
+
+
 
 #pragma mark - AVCaptureMetadataOutputObjectsDelegate
 - (void)captureOutput:(AVCaptureOutput *)output didOutputMetadataObjects:(NSArray<__kindof AVMetadataObject *> *)metadataObjects fromConnection:(AVCaptureConnection *)connection {
@@ -186,11 +255,11 @@
         _metadataObjectTypes = [self defaultMetaDataObjectTypes];
     }
     
-    if (self.setupStatus != YFSessionSetupStatusFinished) {
+    if (_status != YFSessionStatusSetupSucceed) {
         return;
     }
-    dispatch_async(self.sessionQueue, ^{
-        self.metadataOutput.metadataObjectTypes = _metadataObjectTypes;
+    dispatch_async(_sessionQueue, ^{
+        _metadataOutput.metadataObjectTypes = _metadataObjectTypes;
     });
 }
 
@@ -206,8 +275,8 @@
     if (CGRectEqualToRect(rectOfInterest, CGRectZero)) {
         return;
     }
-    dispatch_async(self.sessionQueue, ^{
-        self.metadataOutput.rectOfInterest = rectOfInterest;
+    dispatch_async(_sessionQueue, ^{
+        _metadataOutput.rectOfInterest = rectOfInterest;
     });
 }
 
