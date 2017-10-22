@@ -16,7 +16,7 @@ NS_INLINE void dispatch_main_async(dispatch_block_t block) {
     }
 }
 
-@interface YFScanner()<AVCaptureMetadataOutputObjectsDelegate>
+@interface YFScanner()<AVCaptureMetadataOutputObjectsDelegate, AVCaptureVideoDataOutputSampleBufferDelegate>
 
 @property (nonatomic, strong, readwrite) dispatch_queue_t sessionQueue;
 @property (nonatomic, strong) dispatch_queue_t metadataObjectsQueue;
@@ -24,6 +24,7 @@ NS_INLINE void dispatch_main_async(dispatch_block_t block) {
 @property (nonatomic, strong) AVCaptureDeviceInput *captureDeviceInput;
 @property (nonatomic, strong) AVCaptureMetadataOutput *metadataOutput;
 @property (nonatomic, strong) AVCaptureVideoPreviewLayer *previewLayer;
+@property (nonatomic, strong) AVCaptureVideoDataOutput *videoDataOutput;
 
 @end
 
@@ -60,6 +61,7 @@ NS_INLINE void dispatch_main_async(dispatch_block_t block) {
     _metadataObjectsQueue = dispatch_queue_create( "com.bluesky.scanner.metadataObjects", DISPATCH_QUEUE_SERIAL );
     _captureSession = [[AVCaptureSession alloc] init];
     _metadataOutput = [[AVCaptureMetadataOutput alloc] init];
+    _videoDataOutput = [[AVCaptureVideoDataOutput alloc] init];
     _status = YFSessionStatusUnSetup;
 }
 
@@ -206,7 +208,19 @@ NS_INLINE void dispatch_main_async(dispatch_block_t block) {
             [self.delegate scannerDidAddMetadataOutputSucceed:self];
         }
     }
-        
+    
+    if (![self addVideoDataOutputToCaptureSession:_captureSession]) {
+        NSLog(@"failed to add videoData output to capture session");
+        _status = YFSessionStatusSetupFailed;
+        [_captureSession commitConfiguration];
+        if ([self.delegate respondsToSelector:@selector(scannerDidSessionStatusChanged:)]) {
+            dispatch_main_async(^{
+                [self.delegate scannerDidSessionStatusChanged:self];
+            });
+        }
+        return;
+    }
+    
     _status = YFSessionStatusSetupSucceed;
     [_captureSession commitConfiguration];
     
@@ -250,6 +264,16 @@ NS_INLINE void dispatch_main_async(dispatch_block_t block) {
     return success;
 }
 
+- (BOOL)addVideoDataOutputToCaptureSession:(AVCaptureSession *)captureSession {
+    
+    BOOL success = [self addOutput:_videoDataOutput toCaptureSession:captureSession];
+    if (success) {
+        [_videoDataOutput setSampleBufferDelegate:self queue:dispatch_get_main_queue()];
+    }
+    
+    return success;
+}
+
 - (BOOL)addInput:(AVCaptureDeviceInput *)input toCaptureSession:(AVCaptureSession *)captureSession
 {
     if([captureSession canAddInput:input]){
@@ -273,8 +297,6 @@ NS_INLINE void dispatch_main_async(dispatch_block_t block) {
     return NO;
 }
 
-
-
 #pragma mark - AVCaptureMetadataOutputObjectsDelegate
 - (void)captureOutput:(AVCaptureOutput *)output didOutputMetadataObjects:(NSArray<__kindof AVMetadataObject *> *)metadataObjects fromConnection:(AVCaptureConnection *)connection {
     
@@ -297,6 +319,21 @@ NS_INLINE void dispatch_main_async(dispatch_block_t block) {
         });
     }
 }
+
+#pragma mark - AVCaptureVideoDataOutputSampleBufferDelegate
+
+- (void)captureOutput:(AVCaptureOutput *)output didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer fromConnection:(AVCaptureConnection *)connection {
+    CFDictionaryRef metadataDict = CMCopyDictionaryOfAttachments(NULL,sampleBuffer, kCMAttachmentMode_ShouldPropagate);
+    NSDictionary *metadata = [[NSMutableDictionary alloc] initWithDictionary:(__bridge NSDictionary*)metadataDict];
+    CFRelease(metadataDict);
+    NSDictionary *exifMetadata = [[metadata objectForKey:(NSString *)kCGImagePropertyExifDictionary] mutableCopy];
+    float brightnessValue = [[exifMetadata objectForKey:(NSString *)kCGImagePropertyExifBrightnessValue] floatValue];
+    
+    if ([self.delegate respondsToSelector:@selector(scannerDidCaptureBrightnessSensitive:withBrightness:)]) {
+        [self.delegate scannerDidCaptureBrightnessSensitive:self withBrightness:brightnessValue];
+    }
+}
+
 
 #pragma mark - getters and setters
 - (void)setMetadataObjectTypes:(NSArray<NSString *> *)metadataObjectTypes

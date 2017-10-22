@@ -33,6 +33,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (void)scannerDidSessionStatusChanged:(YFScanner *_Nonnull)scanner;
 
+- (void)scannerDidCaptureBrightnessSensitive:(YFScanner *_Nonnull)scanner withBrightness:(CGFloat)brightness;
+
 @end
 
 @interface YFScanner : NSObject

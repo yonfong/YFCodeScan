@@ -285,6 +285,11 @@ NS_INLINE void dispatch_main_async(dispatch_block_t block) {
     }
 }
 
+- (void)scannerDidCaptureBrightnessSensitive:(YFScanner *_Nonnull)scanner withBrightness:(CGFloat)brightness
+{
+    NSLog(@"%s , brightess>>> %f",__FUNCTION__, brightness);
+}
+
 #pragma mark - getters && setters
 - (void)setMetadataObjectTypes:(NSArray<NSString *> *)metadataObjectTypes
 {
