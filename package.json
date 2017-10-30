@@ -1,0 +1,28 @@
+{
+  "name": "YFCodeScan",
+  "version": "0.8.0",
+  "description": "[![CI Status](http://img.shields.io/travis/bluesky0109/YFCodeScan.svg?style=flat)](https://travis-ci.org/bluesky0109/YFCodeScan) [![Version](https://img.shields.io/cocoapods/v/YFCodeScan.svg?style=flat)](http://cocoapods.org/pods/YFCodeScan) [![License](https://img.shields.io/cocoapods/l/YFCodeScan.svg?style=flat)](http://cocoapods.org/pods/YFCodeScan) [![Platform](https://img.shields.io/cocoapods/p/YFCodeScan.svg?style=flat)](http://cocoapods.org/pods/YFCodeScan)",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bluesky0109/YFCodeScan.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/bluesky0109/YFCodeScan/issues"
+  },
+  "homepage": "https://github.com/bluesky0109/YFCodeScan#readme",
+  "devDependencies": {
+    "cz-conventional-changelog": "^2.1.0"
+  },
+  "config": {
+    "commitizen": {
+      "path": "./node_modules/cz-conventional-changelog"
+    }
+  }
+}
