@@ -6,6 +6,7 @@
 //
 
 #import "YFScanner.h"
+#import <ImageIO/ImageIO.h>
 
 // 主线程执行
 NS_INLINE void dispatch_main_async(dispatch_block_t block) {
