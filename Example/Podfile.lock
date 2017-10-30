@@ -10,7 +10,7 @@ PODS:
   - FBSnapshotTestCase/SwiftSupport (2.1.4):
     - FBSnapshotTestCase/Core
   - Specta (1.0.7)
-  - YFCodeScan (0.5.0)
+  - YFCodeScan (0.6.0)
 
 DEPENDENCIES:
   - Expecta
@@ -21,15 +21,15 @@ DEPENDENCIES:
 
 EXTERNAL SOURCES:
   YFCodeScan:
-    :path: ../
+    :path: "../"
 
 SPEC CHECKSUMS:
   Expecta: 3b6bd90a64b9a1dcb0b70aa0e10a7f8f631667d5
   Expecta+Snapshots: dcff217eef506dabd6dfdc7864ea2da321fafbb8
   FBSnapshotTestCase: 094f9f314decbabe373b87cc339bea235a63e07a
   Specta: 3e1bd89c3517421982dc4d1c992503e48bd5fe66
-  YFCodeScan: 4d53a4c6633c8392f4d9775711fe2a75125f563f
+  YFCodeScan: 0acda35858cddd2c54808c6402d7e72129150fad
 
 PODFILE CHECKSUM: d1f457eae8f24e795e234c4ab499a08621e08d5b
 
-COCOAPODS: 1.3.1
+COCOAPODS: 1.2.0
