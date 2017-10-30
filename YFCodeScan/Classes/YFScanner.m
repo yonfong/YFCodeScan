@@ -130,17 +130,16 @@ NS_INLINE void dispatch_main_async(dispatch_block_t block) {
 
         case AVAuthorizationStatusNotDetermined: {
             dispatch_suspend(_sessionQueue);
-            [AVCaptureDevice
-                requestAccessForMediaType:AVMediaTypeVideo
-                        completionHandler:^(BOOL granted) {
-                            if (!granted) {
-                                _status = YFSessionStatusPemissionDenied;
-                                if ([self.delegate respondsToSelector:@selector(scannerDidSessionStatusChanged:)]) {
-                                    [self.delegate scannerDidSessionStatusChanged:self];
-                                }
-                            }
-                            dispatch_resume(_sessionQueue);
-                        }];
+            [AVCaptureDevice requestAccessForMediaType:AVMediaTypeVideo
+                                     completionHandler:^(BOOL granted) {
+                                         if (!granted) {
+                                             _status = YFSessionStatusPemissionDenied;
+                                             if ([self.delegate respondsToSelector:@selector(scannerDidSessionStatusChanged:)]) {
+                                                 [self.delegate scannerDidSessionStatusChanged:self];
+                                             }
+                                         }
+                                         dispatch_resume(_sessionQueue);
+                                     }];
         } break;
 
         default: {
@@ -217,9 +216,7 @@ NS_INLINE void dispatch_main_async(dispatch_block_t block) {
 
 - (BOOL)addDefaultCameraInputToCaptureSession:(AVCaptureSession *)captureSession {
     NSError *error;
-    AVCaptureDeviceInput *cameraDeviceInput =
-        [[AVCaptureDeviceInput alloc] initWithDevice:[AVCaptureDevice defaultDeviceWithMediaType:AVMediaTypeVideo]
-                                               error:&error];
+    AVCaptureDeviceInput *cameraDeviceInput = [[AVCaptureDeviceInput alloc] initWithDevice:[AVCaptureDevice defaultDeviceWithMediaType:AVMediaTypeVideo] error:&error];
 
     if (error) {
         NSLog(@"error configuring camera input: %@", [error localizedDescription]);
@@ -228,8 +225,7 @@ NS_INLINE void dispatch_main_async(dispatch_block_t block) {
         BOOL success = [self addInput:cameraDeviceInput toCaptureSession:captureSession];
 
         //先进行判断是否支持控制对焦,开启自动对焦功能，加快识别二维码
-        if (cameraDeviceInput.device.isFocusPointOfInterestSupported &&
-            [cameraDeviceInput.device isFocusModeSupported:AVCaptureFocusModeAutoFocus]) {
+        if (cameraDeviceInput.device.isFocusPointOfInterestSupported && [cameraDeviceInput.device isFocusModeSupported:AVCaptureFocusModeAutoFocus]) {
             [cameraDeviceInput.device lockForConfiguration:nil];
             [cameraDeviceInput.device setFocusMode:AVCaptureFocusModeContinuousAutoFocus];
             [cameraDeviceInput.device unlockForConfiguration];
@@ -240,7 +236,6 @@ NS_INLINE void dispatch_main_async(dispatch_block_t block) {
 }
 
 - (BOOL)addMetadataOutputToCaptureSession:(AVCaptureSession *)captureSession {
-
     BOOL success = [self addOutput:_metadataOutput toCaptureSession:captureSession];
     if (success) {
         [_metadataOutput setMetadataObjectsDelegate:self queue:_metadataObjectsQueue];
@@ -251,7 +246,6 @@ NS_INLINE void dispatch_main_async(dispatch_block_t block) {
 }
 
 - (BOOL)addVideoDataOutputToCaptureSession:(AVCaptureSession *)captureSession {
-
     BOOL success = [self addOutput:_videoDataOutput toCaptureSession:captureSession];
     if (success) {
         [_videoDataOutput setSampleBufferDelegate:self queue:dispatch_get_main_queue()];
@@ -281,10 +275,7 @@ NS_INLINE void dispatch_main_async(dispatch_block_t block) {
 }
 
 #pragma mark - AVCaptureMetadataOutputObjectsDelegate
-- (void)captureOutput:(AVCaptureOutput *)output
-    didOutputMetadataObjects:(NSArray<__kindof AVMetadataObject *> *)metadataObjects
-              fromConnection:(AVCaptureConnection *)connection {
-
+- (void)captureOutput:(AVCaptureOutput *)output didOutputMetadataObjects:(NSArray<__kindof AVMetadataObject *> *)metadataObjects fromConnection:(AVCaptureConnection *)connection {
     NSString *scannedResult = nil;
     AVMetadataObject *firstMetadata = metadataObjects.firstObject;
     if ([firstMetadata isKindOfClass:[AVMetadataMachineReadableCodeObject class]]) {
@@ -307,9 +298,7 @@ NS_INLINE void dispatch_main_async(dispatch_block_t block) {
 
 #pragma mark - AVCaptureVideoDataOutputSampleBufferDelegate
 
-- (void)captureOutput:(AVCaptureOutput *)output
-didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
-       fromConnection:(AVCaptureConnection *)connection {
+- (void)captureOutput:(AVCaptureOutput *)output didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer fromConnection:(AVCaptureConnection *)connection {
     CFDictionaryRef metadataDict = CMCopyDictionaryOfAttachments(NULL, sampleBuffer, kCMAttachmentMode_ShouldPropagate);
     NSDictionary *metadata = [[NSMutableDictionary alloc] initWithDictionary:(__bridge NSDictionary *)metadataDict];
     CFRelease(metadataDict);
@@ -335,8 +324,7 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
         _metadataObjectTypes = [self defaultMetaDataObjectTypes];
     }
 
-    if (_status == YFSessionStatusUnSetup || _status == YFSessionStatusSetupFailed ||
-        _status == YFSessionStatusPemissionDenied) {
+    if (_status == YFSessionStatusUnSetup || _status == YFSessionStatusSetupFailed || _status == YFSessionStatusPemissionDenied) {
         return;
     }
 
@@ -376,11 +364,7 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
     ] mutableCopy];
 
     if (floor(NSFoundationVersionNumber) > NSFoundationVersionNumber_iOS_8_0) {
-        [types addObjectsFromArray:@[
-            AVMetadataObjectTypeInterleaved2of5Code,
-            AVMetadataObjectTypeITF14Code,
-            AVMetadataObjectTypeDataMatrixCode
-        ]];
+        [types addObjectsFromArray:@[AVMetadataObjectTypeInterleaved2of5Code, AVMetadataObjectTypeITF14Code, AVMetadataObjectTypeDataMatrixCode]];
     }
 
     return types;

@@ -109,7 +109,8 @@
 - (void)layoutSubviews {
     [super layoutSubviews];
 
-    // Disable CoreAnimation actions so that the positions of the sublayers immediately move to their new position.
+    // Disable CoreAnimation actions so that the positions of the sublayers
+    // immediately move to their new position.
     [CATransaction begin];
     [CATransaction setDisableActions:YES];
 
@@ -123,8 +124,7 @@
 
 - (void)configMaskLayer {
     CGRect rectOfInterest = self.scanCrop;
-    UIBezierPath *path =
-        [UIBezierPath bezierPathWithRect:CGRectMake(0, 0, CGRectGetWidth(self.bounds), CGRectGetHeight(self.bounds))];
+    UIBezierPath *path = [UIBezierPath bezierPathWithRect:CGRectMake(0, 0, CGRectGetWidth(self.bounds), CGRectGetHeight(self.bounds))];
     [path appendPath:[UIBezierPath bezierPathWithRect:rectOfInterest]];
     path.usesEvenOddFillRule = true;
     self.maskLayer.path = [path CGPath];
@@ -145,8 +145,7 @@
     CGRect rectOfInterest = self.scanCrop;
     self.interestRectLayer.path = CGPathCreateWithRect(rectOfInterest, nil);
     self.interestRectLayer.lineWidth = _configuration.scanCropBorderWidth;
-    self.interestRectLayer.strokeColor =
-        _configuration.showScanCropBorder ? _configuration.scanCropBorderColor.CGColor : [UIColor clearColor].CGColor;
+    self.interestRectLayer.strokeColor = _configuration.showScanCropBorder ? _configuration.scanCropBorderColor.CGColor : [UIColor clearColor].CGColor;
 }
 
 - (void)configInterestRectAngleLayer {
@@ -181,19 +180,15 @@
 
     [anglePath applyTransform:CGAffineTransformMakeRotation(M_PI_2)];
     self.topRightAngleLayer.path = anglePath.CGPath;
-    self.topRightAngleLayer.position = CGPointMake(rectOfInterest.origin.x + CGRectGetWidth(rectOfInterest) - offset,
-                                                   rectOfInterest.origin.y + offset);
+    self.topRightAngleLayer.position = CGPointMake(rectOfInterest.origin.x + CGRectGetWidth(rectOfInterest) - offset, rectOfInterest.origin.y + offset);
 
     [anglePath applyTransform:CGAffineTransformMakeRotation(M_PI_2)];
     self.bottomRightAngleLayer.path = anglePath.CGPath;
-    self.bottomRightAngleLayer.position =
-        CGPointMake(rectOfInterest.origin.x + CGRectGetWidth(rectOfInterest) - offset,
-                    rectOfInterest.origin.y + CGRectGetHeight(rectOfInterest) - offset);
+    self.bottomRightAngleLayer.position = CGPointMake(rectOfInterest.origin.x + CGRectGetWidth(rectOfInterest) - offset, rectOfInterest.origin.y + CGRectGetHeight(rectOfInterest) - offset);
 
     [anglePath applyTransform:CGAffineTransformMakeRotation(M_PI_2)];
     self.bottomLeftAngleLayer.path = anglePath.CGPath;
-    self.bottomLeftAngleLayer.position = CGPointMake(
-        rectOfInterest.origin.x + offset, rectOfInterest.origin.y + CGRectGetHeight(rectOfInterest) - offset);
+    self.bottomLeftAngleLayer.position = CGPointMake(rectOfInterest.origin.x + offset, rectOfInterest.origin.y + CGRectGetHeight(rectOfInterest) - offset);
 }
 
 - (void)configTipTextLayer {
@@ -206,9 +201,7 @@
     self.tipTextLayer.bounds = CGRectMake(0, 0, textSize.width, textSize.height);
     self.tipTextLayer.string = tipText;
 
-    self.tipTextLayer.position =
-        CGPointMake(rectOfInterest.origin.x + CGRectGetWidth(rectOfInterest) / 2,
-                    rectOfInterest.origin.y + CGRectGetHeight(rectOfInterest) + textSize.height);
+    self.tipTextLayer.position = CGPointMake(rectOfInterest.origin.x + CGRectGetWidth(rectOfInterest) / 2, rectOfInterest.origin.y + CGRectGetHeight(rectOfInterest) + textSize.height);
 }
 
 - (CGSize)calculateTitleSizeWithString:(NSString *)string {
@@ -217,8 +210,7 @@
     }
     NSDictionary *dic = @{NSFontAttributeName: [UIFont systemFontOfSize:13]};
     CGSize size = [string boundingRectWithSize:CGSizeMake(280, 0)
-                                       options:NSStringDrawingTruncatesLastVisibleLine |
-                                               NSStringDrawingUsesLineFragmentOrigin | NSStringDrawingUsesFontLeading
+                                       options:NSStringDrawingTruncatesLastVisibleLine | NSStringDrawingUsesLineFragmentOrigin | NSStringDrawingUsesFontLeading
                                     attributes:dic
                                        context:nil]
                       .size;
@@ -285,14 +277,12 @@
     if (p1 < p2) {
         CGFloat fixHeight = size.width * 1920. / 1080.;
         CGFloat fixPadding = (fixHeight - size.height) / 2;
-        rectOfInterest = CGRectMake((scanCrop.origin.y + fixPadding) / fixHeight, scanCrop.origin.x / size.width,
-                                    scanCrop.size.height / fixHeight, scanCrop.size.width / size.width);
+        rectOfInterest = CGRectMake((scanCrop.origin.y + fixPadding) / fixHeight, scanCrop.origin.x / size.width, scanCrop.size.height / fixHeight, scanCrop.size.width / size.width);
 
     } else {
         CGFloat fixWidth = size.height * 1080. / 1920.;
         CGFloat fixPadding = (fixWidth - size.width) / 2;
-        rectOfInterest = CGRectMake(scanCrop.origin.y / size.height, (scanCrop.origin.x + fixPadding) / fixWidth,
-                                    scanCrop.size.height / size.height, scanCrop.size.width / fixWidth);
+        rectOfInterest = CGRectMake(scanCrop.origin.y / size.height, (scanCrop.origin.x + fixPadding) / fixWidth, scanCrop.size.height / size.height, scanCrop.size.width / fixWidth);
     }
 
     return rectOfInterest;

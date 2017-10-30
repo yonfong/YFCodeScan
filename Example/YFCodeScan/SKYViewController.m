@@ -29,7 +29,6 @@
 }
 
 - (void)configureInterface {
-
     YFScanPreviewView *preview = [YFScanPreviewView defaultPreview];
     preview.frame = self.view.bounds;
     [self.view addSubview:preview];

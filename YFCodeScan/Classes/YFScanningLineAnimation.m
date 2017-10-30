@@ -30,8 +30,7 @@ static NSString *const kScanPostionKeyframeValueAnimation = @"kScanPostionKeyfra
 
 - (void)startAnimationInView:(UIView *)preview limitRect:(CGRect)limitRect {
     if (!self.lineView) {
-        self.lineView = [[UIView alloc]
-            initWithFrame:CGRectMake(limitRect.origin.x, limitRect.origin.y + 1, CGRectGetWidth(limitRect) - 4, 1)];
+        self.lineView = [[UIView alloc] initWithFrame:CGRectMake(limitRect.origin.x, limitRect.origin.y + 1, CGRectGetWidth(limitRect) - 4, 1)];
         self.lineView.backgroundColor = [UIColor greenColor];
     }
 
@@ -62,32 +61,18 @@ static NSString *const kScanPostionKeyframeValueAnimation = @"kScanPostionKeyfra
     animation.timingFunction = _timingFunction ?: [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionLinear];
 
     if (_lineAnimationType == YFLineAnimationTypeUpToDownThenReverse) {
-        NSValue *value1 =
-            [NSValue valueWithCGPoint:CGPointMake(lineRect.origin.x + CGRectGetWidth(lineRect) / 2, lineRect.origin.y)];
-        NSValue *value2 = [NSValue valueWithCGPoint:CGPointMake(lineRect.origin.x + CGRectGetWidth(lineRect) / 2,
-                                                                lineRect.origin.y + CGRectGetHeight(limitRect) / 2)];
-        NSValue *value3 = [NSValue valueWithCGPoint:CGPointMake(lineRect.origin.x + CGRectGetWidth(lineRect) / 2,
-                                                                lineRect.origin.y + CGRectGetHeight(limitRect) - 1)];
-        NSValue *value4 = [NSValue valueWithCGPoint:CGPointMake(lineRect.origin.x + CGRectGetWidth(lineRect) / 2,
-                                                                lineRect.origin.y + CGRectGetHeight(limitRect) / 2)];
-        NSValue *value5 =
-            [NSValue valueWithCGPoint:CGPointMake(lineRect.origin.x + CGRectGetWidth(lineRect) / 2, lineRect.origin.y)];
+        NSValue *value1 = [NSValue valueWithCGPoint:CGPointMake(lineRect.origin.x + CGRectGetWidth(lineRect) / 2, lineRect.origin.y)];
+        NSValue *value2 = [NSValue valueWithCGPoint:CGPointMake(lineRect.origin.x + CGRectGetWidth(lineRect) / 2, lineRect.origin.y + CGRectGetHeight(limitRect) / 2)];
+        NSValue *value3 = [NSValue valueWithCGPoint:CGPointMake(lineRect.origin.x + CGRectGetWidth(lineRect) / 2, lineRect.origin.y + CGRectGetHeight(limitRect) - 1)];
+        NSValue *value4 = [NSValue valueWithCGPoint:CGPointMake(lineRect.origin.x + CGRectGetWidth(lineRect) / 2, lineRect.origin.y + CGRectGetHeight(limitRect) / 2)];
+        NSValue *value5 = [NSValue valueWithCGPoint:CGPointMake(lineRect.origin.x + CGRectGetWidth(lineRect) / 2, lineRect.origin.y)];
         animation.values = @[value1, value2, value3, value4, value5];
     } else {
-        NSValue *value1 =
-            [NSValue valueWithCGPoint:CGPointMake(lineRect.origin.x + CGRectGetWidth(lineRect) / 2, lineRect.origin.y)];
-        NSValue *value2 =
-            [NSValue valueWithCGPoint:CGPointMake(lineRect.origin.x + CGRectGetWidth(lineRect) / 2,
-                                                  lineRect.origin.y + CGRectGetHeight(limitRect) * 1 / 4)];
-        NSValue *value3 =
-            [NSValue valueWithCGPoint:CGPointMake(lineRect.origin.x + CGRectGetWidth(lineRect) / 2,
-                                                  lineRect.origin.y + CGRectGetHeight(limitRect) * 2 / 4)];
-        NSValue *value4 =
-            [NSValue valueWithCGPoint:CGPointMake(lineRect.origin.x + CGRectGetWidth(lineRect) / 2,
-                                                  lineRect.origin.y + CGRectGetHeight(limitRect) * 3 / 4)];
-        NSValue *value5 =
-            [NSValue valueWithCGPoint:CGPointMake(lineRect.origin.x + CGRectGetWidth(lineRect) / 2,
-                                                  lineRect.origin.y + CGRectGetHeight(limitRect) * 4 / 4 - 1)];
+        NSValue *value1 = [NSValue valueWithCGPoint:CGPointMake(lineRect.origin.x + CGRectGetWidth(lineRect) / 2, lineRect.origin.y)];
+        NSValue *value2 = [NSValue valueWithCGPoint:CGPointMake(lineRect.origin.x + CGRectGetWidth(lineRect) / 2, lineRect.origin.y + CGRectGetHeight(limitRect) * 1 / 4)];
+        NSValue *value3 = [NSValue valueWithCGPoint:CGPointMake(lineRect.origin.x + CGRectGetWidth(lineRect) / 2, lineRect.origin.y + CGRectGetHeight(limitRect) * 2 / 4)];
+        NSValue *value4 = [NSValue valueWithCGPoint:CGPointMake(lineRect.origin.x + CGRectGetWidth(lineRect) / 2, lineRect.origin.y + CGRectGetHeight(limitRect) * 3 / 4)];
+        NSValue *value5 = [NSValue valueWithCGPoint:CGPointMake(lineRect.origin.x + CGRectGetWidth(lineRect) / 2, lineRect.origin.y + CGRectGetHeight(limitRect) * 4 / 4 - 1)];
         animation.values = @[value1, value2, value3, value4, value5];
     }
 

@@ -108,12 +108,9 @@ NS_INLINE void dispatch_main_async(dispatch_block_t block) {
         } break;
         case YFSessionStatusSetupFailed: {
             dispatch_main_async(^{
-                UIAlertController *alertCtl = [UIAlertController alertControllerWithTitle:@"无法捕获图像"
-                                                                                  message:@""
-                                                                           preferredStyle:UIAlertControllerStyleAlert];
+                UIAlertController *alertCtl = [UIAlertController alertControllerWithTitle:@"无法捕获图像" message:@"" preferredStyle:UIAlertControllerStyleAlert];
 
-                UIAlertAction *sureAction =
-                    [UIAlertAction actionWithTitle:@"确定" style:UIAlertActionStyleCancel handler:nil];
+                UIAlertAction *sureAction = [UIAlertAction actionWithTitle:@"确定" style:UIAlertActionStyleCancel handler:nil];
                 [alertCtl addAction:sureAction];
                 [weakSelf presentViewController:alertCtl animated:YES completion:nil];
             });
@@ -123,22 +120,20 @@ NS_INLINE void dispatch_main_async(dispatch_block_t block) {
             dispatch_main_async(^{
                 NSDictionary *infoDictionary = [[NSBundle mainBundle] infoDictionary];
                 NSString *appName = [infoDictionary objectForKey:@"CFBundleDisplayName"];
-                NSString *message = [NSString
-                    stringWithFormat:@"请在iPhone的\"设置-隐私-相机\"中允许%@访问你的相机", appName];
+                NSString *message = [NSString stringWithFormat:@"请在iPhone的\"设置-隐私-相机\"中允许%@"
+                                                               @"访问你的相机",
+                                                               appName];
 
-                UIAlertController *alertCtl = [UIAlertController alertControllerWithTitle:@"相机被禁用"
-                                                                                  message:message
-                                                                           preferredStyle:UIAlertControllerStyleAlert];
+                UIAlertController *alertCtl = [UIAlertController alertControllerWithTitle:@"相机被禁用" message:message preferredStyle:UIAlertControllerStyleAlert];
 
-                UIAlertAction *sureAction = [UIAlertAction
-                    actionWithTitle:@"确定"
-                              style:UIAlertActionStyleDefault
-                            handler:^(UIAlertAction *_Nonnull action) {
-                                NSURL *settingURL = [NSURL URLWithString:UIApplicationOpenSettingsURLString];
-                                if ([[UIApplication sharedApplication] canOpenURL:settingURL]) {
-                                    [[UIApplication sharedApplication] openURL:settingURL];
-                                }
-                            }];
+                UIAlertAction *sureAction = [UIAlertAction actionWithTitle:@"确定"
+                                                                     style:UIAlertActionStyleDefault
+                                                                   handler:^(UIAlertAction *_Nonnull action) {
+                                                                       NSURL *settingURL = [NSURL URLWithString:UIApplicationOpenSettingsURLString];
+                                                                       if ([[UIApplication sharedApplication] canOpenURL:settingURL]) {
+                                                                           [[UIApplication sharedApplication] openURL:settingURL];
+                                                                       }
+                                                                   }];
                 [alertCtl addAction:sureAction];
 
                 [weakSelf presentViewController:alertCtl animated:YES completion:nil];
@@ -174,26 +169,17 @@ NS_INLINE void dispatch_main_async(dispatch_block_t block) {
     self.topBarView.translatesAutoresizingMaskIntoConstraints = NO;
 
     NSDictionary *views = NSDictionaryOfVariableBindings(_topBarView);
-    [self.view addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[_topBarView]|"
-                                                                      options:0
-                                                                      metrics:nil
-                                                                        views:views]];
+    [self.view addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[_topBarView]|" options:0 metrics:nil views:views]];
 
-    [self.view addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[_topBarView(64)]"
-                                                                      options:0
-                                                                      metrics:nil
-                                                                        views:views]];
+    [self.view addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[_topBarView(64)]" options:0 metrics:nil views:views]];
 
     NSBundle *bundle = [NSBundle bundleForClass:[self class]];
     NSURL *bundleURL = [bundle URLForResource:kPodName withExtension:@"bundle"];
     bundle = [NSBundle bundleWithURL:bundleURL];
 
     UIButton *backButton = [UIButton buttonWithType:UIButtonTypeCustom];
-    UIImage *normalImage =
-        [UIImage imageNamed:@"yf_navigationBar_backArrow_normal" inBundle:bundle compatibleWithTraitCollection:nil];
-    UIImage *highlightedImage = [UIImage imageNamed:@"yf_navigationBar_backArrow_highlighted"
-                                           inBundle:bundle
-                      compatibleWithTraitCollection:nil];
+    UIImage *normalImage = [UIImage imageNamed:@"yf_navigationBar_backArrow_normal" inBundle:bundle compatibleWithTraitCollection:nil];
+    UIImage *highlightedImage = [UIImage imageNamed:@"yf_navigationBar_backArrow_highlighted" inBundle:bundle compatibleWithTraitCollection:nil];
     [backButton setImage:normalImage forState:UIControlStateNormal];
     [backButton setImage:highlightedImage forState:UIControlStateHighlighted];
     [backButton addTarget:self action:@selector(backButtonClicked) forControlEvents:UIControlEventTouchUpInside];
@@ -202,15 +188,9 @@ NS_INLINE void dispatch_main_async(dispatch_block_t block) {
     [self.topBarView addSubview:backButton];
 
     views = NSDictionaryOfVariableBindings(backButton);
-    [self.topBarView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-5-[backButton(44)]"
-                                                                            options:0
-                                                                            metrics:nil
-                                                                              views:views]];
+    [self.topBarView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-5-[backButton(44)]" options:0 metrics:nil views:views]];
 
-    [self.topBarView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[backButton(44)]"
-                                                                            options:0
-                                                                            metrics:nil
-                                                                              views:views]];
+    [self.topBarView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[backButton(44)]" options:0 metrics:nil views:views]];
 
     NSLayoutConstraint *buttonCenterY = [NSLayoutConstraint constraintWithItem:backButton
                                                                      attribute:NSLayoutAttributeCenterY
@@ -390,10 +370,8 @@ NS_INLINE void dispatch_main_async(dispatch_block_t block) {
         NSURL *bundleURL = [bundle URLForResource:kPodName withExtension:@"bundle"];
         bundle = [NSBundle bundleWithURL:bundleURL];
 
-        UIImage *normalImage =
-            [UIImage imageNamed:@"yf_flashlight_normal" inBundle:bundle compatibleWithTraitCollection:nil];
-        UIImage *highlightedImage =
-            [UIImage imageNamed:@"yf_flashlight_highlighted" inBundle:bundle compatibleWithTraitCollection:nil];
+        UIImage *normalImage = [UIImage imageNamed:@"yf_flashlight_normal" inBundle:bundle compatibleWithTraitCollection:nil];
+        UIImage *highlightedImage = [UIImage imageNamed:@"yf_flashlight_highlighted" inBundle:bundle compatibleWithTraitCollection:nil];
 
         _flashButton = [UIButton buttonWithType:UIButtonTypeCustom];
         [_flashButton setImage:normalImage forState:UIControlStateNormal];
@@ -404,8 +382,7 @@ NS_INLINE void dispatch_main_async(dispatch_block_t block) {
 
         CGRect scanCropRect = [self.preivewView getScanCropRect];
 
-        CGFloat bottomYPositionOffset =
-            CGRectGetHeight(self.view.bounds) - scanCropRect.origin.y - CGRectGetHeight(scanCropRect);
+        CGFloat bottomYPositionOffset = CGRectGetHeight(self.view.bounds) - scanCropRect.origin.y - CGRectGetHeight(scanCropRect);
 
         _flashButton.translatesAutoresizingMaskIntoConstraints = NO;
         [self.view addConstraint:[NSLayoutConstraint constraintWithItem:_flashButton
@@ -438,8 +415,7 @@ NS_INLINE void dispatch_main_async(dispatch_block_t block) {
 
         CGRect scanCropRect = [self.preivewView getScanCropRect];
 
-        CGFloat bottomYPositionOffset =
-            CGRectGetHeight(self.view.bounds) - scanCropRect.origin.y - CGRectGetHeight(scanCropRect);
+        CGFloat bottomYPositionOffset = CGRectGetHeight(self.view.bounds) - scanCropRect.origin.y - CGRectGetHeight(scanCropRect);
 
         _flashTipLabel.translatesAutoresizingMaskIntoConstraints = NO;
         [self.view addConstraint:[NSLayoutConstraint constraintWithItem:_flashTipLabel
@@ -463,8 +439,7 @@ NS_INLINE void dispatch_main_async(dispatch_block_t block) {
 
 - (NSArray<NSString *> *)defaultMetaDataObjectTypes {
     NSArray *qrCodeTypes = @[AVMetadataObjectTypeQRCode];
-    NSArray *barCodeTypes =
-        @[AVMetadataObjectTypeEAN13Code, AVMetadataObjectTypeEAN8Code, AVMetadataObjectTypeCode128Code];
+    NSArray *barCodeTypes = @[AVMetadataObjectTypeEAN13Code, AVMetadataObjectTypeEAN8Code, AVMetadataObjectTypeCode128Code];
 
     if (self.scanCodeType == YFScanCodeTypeQRCode) {
         return qrCodeTypes;
