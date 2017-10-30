@@ -71,9 +71,9 @@ NS_INLINE void dispatch_main_async(dispatch_block_t block) {
     if (_status == YFSessionStatusRunning) {
         return;
     }
+    _status = YFSessionStatusRunning;
     dispatch_async(_sessionQueue, ^{
         [_captureSession startRunning];
-        _status = YFSessionStatusRunning;
         if ([self.delegate respondsToSelector:@selector(scannerDidSessionStatusChanged:)]) {
             dispatch_main_async(^{
                 [self.delegate scannerDidSessionStatusChanged:self];
@@ -88,9 +88,9 @@ NS_INLINE void dispatch_main_async(dispatch_block_t block) {
         return;
     }
     
+    _status = YFSessionStatusStop;
     dispatch_async(_sessionQueue, ^{
         [_captureSession stopRunning];
-        _status = YFSessionStatusStop;
         if ([self.delegate respondsToSelector:@selector(scannerDidSessionStatusChanged:)]) {
             dispatch_main_async(^{
                 [self.delegate scannerDidSessionStatusChanged:self];
