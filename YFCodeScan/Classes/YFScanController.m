@@ -111,6 +111,7 @@ NS_INLINE void dispatch_main_async(dispatch_block_t block) {
 
     switch (self.scanner.status) {
         case YFSessionStatusSetupSucceed:
+        case YFSessionStatusStop:
         {
             [weakSelf.scanner startScanning];
         }
