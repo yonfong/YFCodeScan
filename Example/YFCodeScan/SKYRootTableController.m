@@ -19,7 +19,6 @@
     [super viewDidLoad];
 }
 
-
 #pragma mark - Table view data source
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
@@ -30,13 +29,12 @@
     return 1;
 }
 
-
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
     static NSString *kCellId = @"kTestCellId";
     UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:kCellId forIndexPath:indexPath];
 
     cell.textLabel.text = @"扫一扫";
-    
+
     return cell;
 }
 

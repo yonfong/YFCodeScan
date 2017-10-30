@@ -9,7 +9,7 @@
 
 @import AVFoundation;
 
-typedef NS_ENUM(NSInteger,YFSessionStatus) {
+typedef NS_ENUM(NSInteger, YFSessionStatus) {
     YFSessionStatusUnSetup,
     YFSessionStatusPemissionDenied,
     YFSessionStatusSetupFailed,
@@ -43,13 +43,13 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property (nonatomic, copy, null_resettable) NSArray<NSString *> *metadataObjectTypes;
 
-@property (nonatomic,copy)void (^ _Nullable scanSuccessResult)(NSString * _Nullable scannedResult);
+@property (nonatomic, copy) void (^_Nullable scanSuccessResult)(NSString *_Nullable scannedResult);
 
 @property (nonatomic, assign) CGRect rectOfInterest;
 
-@property (nonatomic, weak) id <YFScannerDelegate> delegate;
+@property (nonatomic, weak) id<YFScannerDelegate> delegate;
 
-- (instancetype _Nullable )initWithScanSuccess:(void(^_Nullable)(NSString * _Nonnull scannedResult))success;
+- (instancetype _Nullable)initWithScanSuccess:(void (^_Nullable)(NSString *_Nonnull scannedResult))success;
 
 - (void)startScanning;
 

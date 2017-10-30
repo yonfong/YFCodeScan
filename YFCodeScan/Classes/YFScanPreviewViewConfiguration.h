@@ -5,15 +5,14 @@
 //  Created by sky on 2017/10/14.
 //
 
-#import <Foundation/Foundation.h>
 #import "YFScanningAnimationProtocol.h"
+#import <Foundation/Foundation.h>
 
 typedef NS_ENUM(NSInteger, YFScanCropAngleAttachment) {
     YFScanCropAngleAttachmentOuter,
     YFScanCropAngleAttachmentInner,
     YFScanCropAngleAttachmentOn
 };
-
 
 @interface YFScanPreviewViewConfiguration : NSObject
 
@@ -25,24 +24,24 @@ typedef NS_ENUM(NSInteger, YFScanCropAngleAttachment) {
 
 @property (nonatomic, assign) CGFloat scanCropCenterYOffset;
 
-@property (nonatomic, strong) UIColor * _Nullable scanCropBorderColor;
+@property (nonatomic, strong) UIColor *_Nullable scanCropBorderColor;
 
 @property (nonatomic, assign) CGFloat scanCropBorderWidth;
 
 @property (nonatomic, assign) YFScanCropAngleAttachment angleAttachment;
 
-@property (nonatomic, strong) id <YFScanningAnimationProtocol> _Nullable scanningAnimationItem;
+@property (nonatomic, strong) id<YFScanningAnimationProtocol> _Nullable scanningAnimationItem;
 
-@property (nonatomic, strong) UIColor * _Nullable angleLineColor;
+@property (nonatomic, strong) UIColor *_Nullable angleLineColor;
 
 @property (nonatomic, assign) CGFloat angleLineWidth;
 
 @property (nonatomic, assign) CGFloat angleLineHeight;
 
-@property (nonatomic, strong) UIColor * _Nullable maskFillColor;
+@property (nonatomic, strong) UIColor *_Nullable maskFillColor;
 
-@property (nonatomic, copy) NSString * _Nullable tipText;
+@property (nonatomic, copy) NSString *_Nullable tipText;
 
-+ (instancetype _Nullable )defaultConfiguration;
++ (instancetype _Nullable)defaultConfiguration;
 
 @end

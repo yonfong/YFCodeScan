@@ -5,13 +5,10 @@
 //  Created by sky on 2017/10/15.
 //
 
-#import <Foundation/Foundation.h>
 #import "YFScanningAnimationProtocol.h"
+#import <Foundation/Foundation.h>
 
-typedef NS_ENUM(NSInteger, YFLineAnimationType) {
-    YFLineAnimationTypeUpToDown,
-    YFLineAnimationTypeUpToDownThenReverse
-};
+typedef NS_ENUM(NSInteger, YFLineAnimationType) { YFLineAnimationTypeUpToDown, YFLineAnimationTypeUpToDownThenReverse };
 
 @interface YFScanningLineAnimation : NSObject <YFScanningAnimationProtocol>
 

@@ -10,7 +10,7 @@
 
 @protocol YFScanningAnimationProtocol <NSObject>
 
-- (void)startAnimationInView:(UIView*)preview limitRect:(CGRect)limitRect;
+- (void)startAnimationInView:(UIView *)preview limitRect:(CGRect)limitRect;
 
 - (void)stopAnimation;
 
