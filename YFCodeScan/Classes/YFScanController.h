@@ -27,6 +27,8 @@ typedef NS_ENUM(NSInteger, YFScanCodeType) { YFScanCodeTypeQRCode, YFScanCodeTyp
 
 @property (nonatomic, copy) NSString *topBarTitle;
 
+@property (nonatomic, assign) BOOL enableBrightnessSensitive;
+
 + (instancetype)defaultScanCtroller;
 
 - (void)startScanning;

@@ -65,6 +65,7 @@ NS_INLINE void dispatch_main_async(dispatch_block_t block) {
     _preivewView = [YFScanPreviewView defaultPreview];
     _scanCodeType = YFScanCodeTypeQRAndBarCode;
     _enableInterestRect = YES;
+    _enableBrightnessSensitive = YES;
 }
 
 #pragma mark - lifeCycle
@@ -270,15 +271,9 @@ NS_INLINE void dispatch_main_async(dispatch_block_t block) {
         return;
     }
 
-    if (weakLight) {
-        self.flashButton.hidden = NO;
-        self.flashTipLabel.text = @"轻触照亮";
-        self.flashTipLabel.hidden = NO;
-    } else {
-        self.flashButton.hidden = YES;
-        self.flashTipLabel.text = @"轻触照亮";
-        self.flashTipLabel.hidden = YES;
-    }
+    self.flashButton.hidden = !weakLight;
+    self.flashTipLabel.hidden = !weakLight;
+    self.flashTipLabel.text = @"轻触照亮";
 }
 
 - (void)flashClicked:(UIButton *)sender {
@@ -315,6 +310,9 @@ NS_INLINE void dispatch_main_async(dispatch_block_t block) {
 }
 
 - (void)scannerDidCaptureBrightnessSensitive:(YFScanner *_Nonnull)scanner withBrightness:(CGFloat)brightness {
+    if (!_enableBrightnessSensitive) {
+        return;
+    }
     BOOL weakLight = brightness < 0;
     [self showFlashLight:weakLight];
 }
