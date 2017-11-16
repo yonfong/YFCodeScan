@@ -22,7 +22,7 @@ pod 'YFCodeScan'
 
 ## Author
 
-bluesky0109, huifeng0109@gmail.com
+yonfong, yonfeng.zhang@gmail.com
 
 ## License
 
