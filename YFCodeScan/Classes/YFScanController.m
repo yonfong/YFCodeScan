@@ -166,15 +166,19 @@ NS_INLINE void dispatch_main_async(dispatch_block_t block) {
 #pragma mark - config
 
 - (void)configTopBar {
+    CGFloat statusBarHeight = CGRectGetHeight(UIApplication.sharedApplication.statusBarFrame);
+    CGFloat navBarHeight = 44;
+    CGFloat topBarHeight = statusBarHeight + navBarHeight;
+    
     [self.view addSubview:self.topBarView];
     self.topBarView.translatesAutoresizingMaskIntoConstraints = NO;
 
     NSDictionary *views = NSDictionaryOfVariableBindings(_topBarView);
     [self.view addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[_topBarView]|" options:0 metrics:nil views:views]];
 
-    [self.view addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[_topBarView(64)]" options:0 metrics:nil views:views]];
+    [self.view addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[_topBarView(==height)]" options:0 metrics:@{@"height":@(topBarHeight)} views:views]];
 
-    NSBundle *bundle = [NSBundle bundleForClass:[self class]];
+    NSBundle *bundle = [NSBundle bundleForClass:[YFScanController class]];
     NSURL *bundleURL = [bundle URLForResource:kPodName withExtension:@"bundle"];
     bundle = [NSBundle bundleWithURL:bundleURL];
 
@@ -189,9 +193,9 @@ NS_INLINE void dispatch_main_async(dispatch_block_t block) {
     [self.topBarView addSubview:backButton];
 
     views = NSDictionaryOfVariableBindings(backButton);
-    [self.topBarView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-5-[backButton(44)]" options:0 metrics:nil views:views]];
+    [self.topBarView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-5-[backButton(==height)]" options:0 metrics:@{@"height":@(navBarHeight)} views:views]];
 
-    [self.topBarView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[backButton(44)]" options:0 metrics:nil views:views]];
+    [self.topBarView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[backButton(==height)]" options:0 metrics:@{@"height":@(navBarHeight)} views:views]];
 
     NSLayoutConstraint *buttonCenterY = [NSLayoutConstraint constraintWithItem:backButton
                                                                      attribute:NSLayoutAttributeCenterY
@@ -199,7 +203,7 @@ NS_INLINE void dispatch_main_async(dispatch_block_t block) {
                                                                         toItem:self.topBarView
                                                                      attribute:NSLayoutAttributeCenterY
                                                                     multiplier:1
-                                                                      constant:10];
+                                                                      constant:statusBarHeight/2];
     [self.topBarView addConstraint:buttonCenterY];
 
     UILabel *topBarTitleView = [[UILabel alloc] init];
@@ -225,7 +229,7 @@ NS_INLINE void dispatch_main_async(dispatch_block_t block) {
                                                                        toItem:self.topBarView
                                                                     attribute:NSLayoutAttributeCenterY
                                                                    multiplier:1
-                                                                     constant:10];
+                                                                     constant:statusBarHeight/2];
 
     [self.topBarView addConstraint:titleCenterX];
     [self.topBarView addConstraint:titleCenterY];
@@ -364,7 +368,7 @@ NS_INLINE void dispatch_main_async(dispatch_block_t block) {
 
 - (UIButton *)flashButton {
     if (!_flashButton) {
-        NSBundle *bundle = [NSBundle bundleForClass:[self class]];
+        NSBundle *bundle = [NSBundle bundleForClass:[YFScanController class]];
         NSURL *bundleURL = [bundle URLForResource:kPodName withExtension:@"bundle"];
         bundle = [NSBundle bundleWithURL:bundleURL];
 
