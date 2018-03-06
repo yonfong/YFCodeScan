@@ -8,7 +8,7 @@
 
 Pod::Spec.new do |s|
   s.name             = 'YFCodeScan'
-  s.version          = '1.0.0'
+  s.version          = '1.0.1'
   s.summary          = 'A lightweight, easy-to-use code scanning library'
 
 # This description is used to generate tags and improve search results.
