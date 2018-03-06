@@ -441,7 +441,7 @@ NS_INLINE void dispatch_main_async(dispatch_block_t block) {
 
 - (NSArray<NSString *> *)defaultMetaDataObjectTypes {
     NSArray *qrCodeTypes = @[AVMetadataObjectTypeQRCode];
-    NSArray *barCodeTypes = @[AVMetadataObjectTypeEAN13Code, AVMetadataObjectTypeEAN8Code, AVMetadataObjectTypeCode128Code];
+    NSArray *barCodeTypes = @[AVMetadataObjectTypeEAN13Code, AVMetadataObjectTypeEAN8Code, AVMetadataObjectTypeCode128Code,AVMetadataObjectTypeCode39Code,AVMetadataObjectTypeCode93Code];
 
     if (self.scanCodeType == YFScanCodeTypeQRCode) {
         return qrCodeTypes;
