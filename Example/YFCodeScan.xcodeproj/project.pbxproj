@@ -252,7 +252,7 @@
 			isa = PBXProject;
 			attributes = {
 				CLASSPREFIX = SKY;
-				LastUpgradeCheck = 0910;
+				LastUpgradeCheck = 0920;
 				ORGANIZATIONNAME = bluesky0109;
 				TargetAttributes = {
 					6003F589195388D20070C39A = {
